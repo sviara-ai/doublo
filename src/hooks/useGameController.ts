@@ -13,7 +13,7 @@ import {
 import { persistGame, resumeOrStart, startNewGame } from '@/game/session';
 import { clearSavedGame } from '@/data/game-repository';
 import { playMoveHaptic } from '@/lib/haptics';
-import { playScoreSound } from '@/lib/sound';
+import { playScoreSound, preloadSound } from '@/lib/sound';
 import { getAdService } from '@/services/ad-service';
 import { getDeviceId } from '@/services/auth-service';
 import { buildScoreEntry } from '@/services/score-service';
@@ -38,6 +38,7 @@ export function useGameController() {
   }, [clearPendingCleanup]);
 
   const bootstrap = useCallback(async () => {
+    preloadSound();
     await useSettingsStore.getState().hydrate();
     void useStatsStore.getState().hydrate();
     await resumeOrStart();
@@ -103,7 +104,7 @@ export function useGameController() {
       });
       playMoveHaptic(result.scoreGained > 0);
       if (result.scoreGained > 0 && useSettingsStore.getState().soundEnabled) {
-        void playScoreSound();
+        playScoreSound();
       }
 
       if (status === 'over') {
