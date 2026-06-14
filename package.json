@@ -3,13 +3,15 @@
   "version": "1.0.0",
   "main": "expo-router/entry",
   "private": true,
+  "homepage": "https://sviara-ai.github.io/sviara-website",
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
     "typecheck": "tsc --noEmit",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "@expo/metro-runtime": "~4.0.1",
@@ -37,6 +39,7 @@
     "@types/react": "~18.3.12",
     "eslint": "^8.57.0",
     "eslint-config-expo": "~8.0.1",
+    "gh-pages": "^6.3.0",
     "typescript": "~5.3.3"
   },
   "overrides": {
