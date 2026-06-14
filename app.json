@@ -18,11 +18,16 @@
       "package": "com.sviara.doublo"
     },
     "web": {
-      "bundler": "metro"
+      "bundler": "metro",
+      "output": "static"
     },
     "plugins": [
       "expo-router",
-      "expo-asset"
-    ]
+      "expo-asset",
+      "expo-font"
+    ],
+    "experiments": {
+      "baseUrl": "/doublo"
+    }
   }
 }
