@@ -87,7 +87,7 @@ export default function SettingsScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView edges={['top', 'left', 'right']} style={styles.safe}>
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={[
@@ -99,6 +99,15 @@ export default function SettingsScreen() {
         ]}
         showsVerticalScrollIndicator={false}
       >
+        <View style={styles.topbar}>
+          <Pressable
+            accessibilityRole="button"
+            hitSlop={12}
+            onPress={() => goHomeOrBack(router)}
+          >
+            <Text style={styles.back}>‹ Back</Text>
+          </Pressable>
+        </View>
         <Text style={styles.title}>Settings</Text>
         <Text style={styles.note}>
           Changing the grid, starting tiles, or target starts a new game.
@@ -168,6 +177,15 @@ const makeStyles = (colors: Colors) =>
       alignSelf: 'center',
       paddingVertical: spacing.xl,
       gap: spacing.lg,
+    },
+    topbar: {
+      width: '100%',
+      alignItems: 'flex-start',
+    },
+    back: {
+      fontSize: font.md,
+      fontWeight: '700',
+      color: colors.primary,
     },
     title: {
       fontSize: font.title,

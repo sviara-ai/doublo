@@ -6,13 +6,14 @@ import { Button } from '@/components/ui/Button';
 import type { Colors } from '@/theme/colors';
 import { useScreenMetrics } from '@/theme/layout';
 import { useThemedStyles } from '@/theme/useTheme';
-import { font, layout, spacing } from '@/theme/tokens';
+import { font, layout, radius, spacing } from '@/theme/tokens';
 import { useSettingsStore } from '@/store/settings-store';
 import { useStatsStore } from '@/store/stats-store';
 
 export default function HomeScreen() {
   const router = useRouter();
   const best = useStatsStore((state) => state.best);
+  const gamesPlayed = useStatsStore((state) => state.gamesPlayed);
   const hydrate = useStatsStore((state) => state.hydrate);
   const winTarget = useSettingsStore((state) => state.winTarget);
   const hydrateSettings = useSettingsStore((state) => state.hydrate);
@@ -25,7 +26,7 @@ export default function HomeScreen() {
   }, [hydrate, hydrateSettings]);
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView edges={['top', 'left', 'right']} style={styles.safe}>
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={[
@@ -33,12 +34,14 @@ export default function HomeScreen() {
           {
             maxWidth: metrics.contentMaxWidth,
             paddingHorizontal: metrics.horizontalPadding + spacing.sm,
-            paddingVertical: metrics.isShort ? spacing.xl : spacing.xxl * 2,
           },
         ]}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.hero}>
+          <View style={styles.logo}>
+            <Text style={styles.logoText}>{winTarget}</Text>
+          </View>
           <Text
             style={[styles.title, metrics.isNarrow && styles.titleCompact]}
             numberOfLines={1}
@@ -46,12 +49,25 @@ export default function HomeScreen() {
           >
             Doublo
           </Text>
-          <Text style={styles.tagline}>
-            Swipe. Merge. Double to {winTarget}.
-          </Text>
+          <Text style={styles.tagline}>Swipe, merge, and double the tiles.</Text>
         </View>
+
+        <View style={styles.stats}>
+          <View style={styles.statCard}>
+            <Text style={styles.statLabel}>BEST</Text>
+            <Text style={styles.statValue} numberOfLines={1} adjustsFontSizeToFit>
+              {best}
+            </Text>
+          </View>
+          <View style={styles.statCard}>
+            <Text style={styles.statLabel}>GAMES</Text>
+            <Text style={styles.statValue} numberOfLines={1} adjustsFontSizeToFit>
+              {gamesPlayed}
+            </Text>
+          </View>
+        </View>
+
         <View style={styles.actions}>
-          <Text style={styles.best}>Best {best}</Text>
           <Button label="Play" onPress={() => router.push('/game')} />
           <Button
             label="Scores"
@@ -85,18 +101,34 @@ const makeStyles = (colors: Colors) =>
       maxWidth: layout.maxContentWidth,
       alignSelf: 'center',
       alignItems: 'center',
-      justifyContent: 'space-between',
+      justifyContent: 'center',
+      gap: spacing.xxl,
       paddingHorizontal: spacing.xl,
-      paddingVertical: spacing.xxl * 2,
+      paddingVertical: spacing.xxl,
     },
     hero: {
       alignItems: 'center',
       gap: spacing.md,
     },
+    logo: {
+      width: 96,
+      height: 96,
+      borderRadius: radius.lg,
+      backgroundColor: colors.primary,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: spacing.sm,
+    },
+    logoText: {
+      color: colors.textInverse,
+      fontSize: font.lg,
+      fontWeight: '800',
+    },
     title: {
       fontSize: font.hero,
       fontWeight: '800',
       color: colors.text,
+      letterSpacing: 0.5,
     },
     titleCompact: {
       fontSize: font.title,
@@ -106,16 +138,37 @@ const makeStyles = (colors: Colors) =>
       color: colors.textMuted,
       textAlign: 'center',
     },
+    stats: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      gap: spacing.md,
+    },
+    statCard: {
+      minWidth: layout.scoreStatMinWidth,
+      alignItems: 'center',
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.hairline,
+      borderRadius: radius.md,
+      paddingVertical: spacing.md,
+      paddingHorizontal: spacing.xl,
+    },
+    statLabel: {
+      color: colors.textMuted,
+      fontSize: font.xs,
+      fontWeight: '700',
+      letterSpacing: 1,
+    },
+    statValue: {
+      color: colors.text,
+      fontSize: font.xl,
+      fontWeight: '800',
+      maxWidth: '100%',
+    },
     actions: {
       width: '100%',
       maxWidth: layout.maxButtonWidth,
       alignItems: 'center',
       gap: spacing.md,
-    },
-    best: {
-      fontSize: font.md,
-      fontWeight: '700',
-      color: colors.textMuted,
-      marginBottom: spacing.sm,
     },
   });

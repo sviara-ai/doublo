@@ -47,7 +47,7 @@ export default function GameScreen() {
   const showOverlay = !isPlaying && !overlayDismissed;
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView edges={['top', 'left', 'right']} style={styles.safe}>
       <View style={styles.container}>
         <View
           collapsable={false}

@@ -40,7 +40,7 @@ export default function HistoryScreen() {
   }, [hydrate]);
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView edges={['top', 'left', 'right']} style={styles.safe}>
       <View
         style={[
           styles.content,
