@@ -1,0 +1,28 @@
+{
+  "expo": {
+    "name": "Doublo",
+    "slug": "doublo",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "doublo",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.sviara.doublo"
+    },
+    "android": {
+      "package": "com.sviara.doublo"
+    },
+    "web": {
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-asset"
+    ]
+  }
+}
