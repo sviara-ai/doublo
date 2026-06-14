@@ -1,42 +1,27 @@
 # Doublo
 
-A 2048-style merge game for iOS and Android, built with Expo + React Native + TypeScript.
+**Play now: [doublo.sviara.com](https://doublo.sviara.com/)**
 
-Swipe to slide tiles; equal tiles merge and double. Reach 2048 to win, then keep going for a high score.
+Doublo is a fast, minimal sliding-tile puzzle. Swipe to move every tile at once — when two
+tiles with the same number touch, they merge into one that's double the value. Keep merging to
+build bigger numbers and chase your best score.
 
-## Quick start
+## How to play
 
-```
-npm install
-npx expo start
-```
+- **Swipe** up, down, left, or right (or use arrow keys / WASD on desktop) to slide all the tiles.
+- When two tiles with the **same number** collide, they **merge and double**.
+- Each move adds a new tile, so the board keeps filling up.
+- Reach the **target tile to win** — then keep going for a higher score.
+- The game ends when the board is full and no merges are left.
 
-Then press `i` for the iOS simulator, `a` for the Android emulator, or scan the QR code with the Expo Go app.
+## Features
 
-## Scripts
+- Choose your challenge: grid size, starting tiles, and win target.
+- Light and dark themes that follow your device.
+- Undo your last move.
+- Sound effects with a mute toggle.
+- Your best score and game history are saved on your device.
 
-| Command | What it does |
-|---|---|
-| `npm start` | Start the Expo dev server |
-| `npm run ios` / `npm run android` | Start on a simulator/emulator |
-| `npm run web` | Start in the browser |
-| `npm run typecheck` | Strict TypeScript check |
-| `npm run lint` | Lint with eslint-config-expo |
+---
 
-## Project layout
-
-```
-app/                 expo-router screens (home, game, history)
-src/game/            pure game engine (no UI imports)
-src/hooks/           useGameController orchestrates engine + store + persistence
-src/store/           zustand state (game, stats)
-src/features/        UI: board, tiles, HUD
-src/components/ui/   shared primitives (Button, Overlay)
-src/data/            AsyncStorage repositories (saved game, scoreboard)
-src/services/        auth (device id), score, leaderboard (Phase 2 seam)
-src/lib/             platform-safe wrappers (haptics)
-src/shared/          shared types and zod schemas
-src/theme/           colors (light/dark), tiles, tokens, responsive layout
-```
-
-See [docs/PLAN.md](docs/PLAN.md) for the full plan and Phase 2 roadmap.
+© Sviara
