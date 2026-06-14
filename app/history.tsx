@@ -4,7 +4,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Button } from '@/components/ui/Button';
 import { config } from '@/config';
-import { palette } from '@/theme/colors';
+import { goHomeOrBack } from '@/lib/navigation';
+import type { Colors } from '@/theme/colors';
+import { useScreenMetrics } from '@/theme/layout';
+import { useThemedStyles } from '@/theme/useTheme';
+import { font, layout, radius, spacing } from '@/theme/tokens';
 import { useStatsStore } from '@/store/stats-store';
 
 interface SummaryProps {
@@ -13,6 +17,7 @@ interface SummaryProps {
 }
 
 function Summary({ label, value }: SummaryProps) {
+  const styles = useThemedStyles(makeStyles);
   return (
     <View style={styles.summaryItem}>
       <Text style={styles.summaryValue}>{value}</Text>
@@ -27,113 +32,162 @@ export default function HistoryScreen() {
   const best = useStatsStore((state) => state.best);
   const gamesPlayed = useStatsStore((state) => state.gamesPlayed);
   const hydrate = useStatsStore((state) => state.hydrate);
+  const styles = useThemedStyles(makeStyles);
+  const metrics = useScreenMetrics();
 
   useEffect(() => {
     void hydrate();
   }, [hydrate]);
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>Scores</Text>
-      <View style={styles.summary}>
-        <Summary label="Best" value={best} />
-        <Summary label="Games" value={gamesPlayed} />
-      </View>
-      {config.onlineEnabled ? null : (
-        <Text style={styles.soon}>Global leaderboard coming soon</Text>
-      )}
-      <FlatList
-        style={styles.list}
-        data={history}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.listContent}
-        ListEmptyComponent={
-          <Text style={styles.empty}>No games yet. Play your first round!</Text>
-        }
-        renderItem={({ item }) => (
-          <View style={styles.entry}>
-            <Text style={styles.entryScore}>{item.score}</Text>
-            <Text style={styles.entryMeta}>
-              max {item.maxTile} · {item.moves} moves
-            </Text>
-          </View>
+    <SafeAreaView style={styles.safe}>
+      <View
+        style={[
+          styles.content,
+          {
+            maxWidth: metrics.contentMaxWidth,
+            paddingHorizontal: metrics.horizontalPadding + spacing.sm,
+            paddingVertical: metrics.isShort ? spacing.lg : spacing.xl,
+          },
+        ]}
+      >
+        <Text
+          style={[styles.title, metrics.isNarrow && styles.titleCompact]}
+          numberOfLines={1}
+          adjustsFontSizeToFit
+        >
+          Scores
+        </Text>
+        <View style={styles.summary}>
+          <Summary label="Best" value={best} />
+          <Summary label="Games" value={gamesPlayed} />
+        </View>
+        {config.onlineEnabled ? null : (
+          <Text style={styles.soon}>Global leaderboard coming soon</Text>
         )}
-      />
-      <Button label="Back" variant="ghost" onPress={() => router.back()} />
+        <FlatList
+          style={styles.list}
+          data={history}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
+          ListEmptyComponent={
+            <Text style={styles.empty}>No games yet. Play your first round!</Text>
+          }
+          renderItem={({ item }) => (
+            <View style={styles.entry}>
+              <Text
+                style={styles.entryScore}
+                numberOfLines={1}
+                adjustsFontSizeToFit
+              >
+                {item.score}
+              </Text>
+              <Text style={styles.entryMeta}>
+                max {item.maxTile} · {item.moves} moves
+              </Text>
+            </View>
+          )}
+        />
+        <Button
+          label="Back"
+          variant="ghost"
+          onPress={() => goHomeOrBack(router)}
+        />
+      </View>
     </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: palette.background,
-    paddingHorizontal: 20,
-    paddingVertical: 24,
-  },
-  title: {
-    fontSize: 40,
-    fontWeight: '800',
-    color: palette.text,
-    textAlign: 'center',
-  },
-  summary: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 16,
-    marginTop: 16,
-  },
-  summaryItem: {
-    backgroundColor: palette.card,
-    borderRadius: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 28,
-    alignItems: 'center',
-  },
-  summaryValue: {
-    color: palette.textInverse,
-    fontSize: 26,
-    fontWeight: '800',
-  },
-  summaryLabel: {
-    color: palette.textInverse,
-    fontSize: 12,
-    fontWeight: '700',
-    letterSpacing: 1,
-  },
-  soon: {
-    textAlign: 'center',
-    color: palette.muted,
-    marginTop: 16,
-  },
-  list: {
-    flex: 1,
-    marginTop: 16,
-  },
-  listContent: {
-    gap: 10,
-    paddingBottom: 16,
-  },
-  empty: {
-    textAlign: 'center',
-    color: palette.muted,
-    marginTop: 40,
-  },
-  entry: {
-    backgroundColor: '#eee4da',
-    borderRadius: 8,
-    padding: 14,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  entryScore: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: palette.text,
-  },
-  entryMeta: {
-    fontSize: 14,
-    color: palette.muted,
-  },
-});
+const makeStyles = (colors: Colors) =>
+  StyleSheet.create({
+    safe: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    content: {
+      flex: 1,
+      width: '100%',
+      maxWidth: layout.maxContentWidth,
+      alignSelf: 'center',
+      paddingHorizontal: spacing.xl,
+      paddingVertical: spacing.xl,
+    },
+    title: {
+      fontSize: font.title,
+      fontWeight: '800',
+      color: colors.text,
+      textAlign: 'center',
+    },
+    titleCompact: {
+      fontSize: font.xl,
+    },
+    summary: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      justifyContent: 'center',
+      gap: spacing.lg,
+      marginTop: spacing.lg,
+    },
+    summaryItem: {
+      backgroundColor: colors.cardNavy,
+      borderRadius: radius.md,
+      paddingVertical: spacing.md,
+      paddingHorizontal: spacing.xl,
+      alignItems: 'center',
+      minWidth: layout.summaryMinWidth,
+    },
+    summaryValue: {
+      color: colors.textInverse,
+      fontSize: font.xl,
+      fontWeight: '800',
+    },
+    summaryLabel: {
+      color: colors.textInverse,
+      fontSize: font.xs,
+      fontWeight: '700',
+      letterSpacing: 1,
+    },
+    soon: {
+      textAlign: 'center',
+      color: colors.textMuted,
+      marginTop: spacing.lg,
+    },
+    list: {
+      flex: 1,
+      marginTop: spacing.lg,
+    },
+    listContent: {
+      gap: spacing.sm,
+      paddingBottom: spacing.lg,
+    },
+    empty: {
+      textAlign: 'center',
+      color: colors.textMuted,
+      marginTop: spacing.xxl,
+    },
+    entry: {
+      backgroundColor: colors.surface,
+      borderRadius: radius.md,
+      borderWidth: 1,
+      borderColor: colors.hairline,
+      padding: spacing.lg,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: spacing.md,
+    },
+    entryScore: {
+      fontSize: font.lg,
+      fontWeight: '800',
+      color: colors.text,
+      flexShrink: 1,
+      minWidth: 72,
+    },
+    entryMeta: {
+      fontSize: font.sm,
+      color: colors.textMuted,
+      flexShrink: 1,
+      textAlign: 'right',
+    },
+  });

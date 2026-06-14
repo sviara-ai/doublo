@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { memo, useEffect } from 'react';
 import { StyleSheet, Text } from 'react-native';
 import Animated, {
   useAnimatedStyle,
@@ -6,31 +6,34 @@ import Animated, {
   withSequence,
   withTiming,
 } from 'react-native-reanimated';
-import { MOVE_DURATION_MS } from '@/game/constants';
-import { tileColor } from '@/theme/colors';
-import { cellPosition, cellSize, fontSizeForValue } from '@/theme/metrics';
+import { tileColor } from '@/theme/tiles';
 import type { Tile as TileModel } from '@/shared/types';
 
 interface Props {
   tile: TileModel;
+  x: number;
+  y: number;
+  size: number;
+  fontSize: number;
+  duration: number;
 }
 
-export function Tile({ tile }: Props) {
-  const x = useSharedValue(cellPosition(tile.col));
-  const y = useSharedValue(cellPosition(tile.row));
+function TileView({ tile, x, y, size, fontSize, duration }: Props) {
+  const tx = useSharedValue(x);
+  const ty = useSharedValue(y);
   const scale = useSharedValue(tile.isNew ? 0 : 1);
   const opacity = useSharedValue(1);
 
   useEffect(() => {
-    x.value = withTiming(cellPosition(tile.col), { duration: MOVE_DURATION_MS });
-    y.value = withTiming(cellPosition(tile.row), { duration: MOVE_DURATION_MS });
-  }, [tile.col, tile.row, x, y]);
+    tx.value = withTiming(x, { duration });
+    ty.value = withTiming(y, { duration });
+  }, [x, y, duration, tx, ty]);
 
   useEffect(() => {
     if (tile.isNew) {
-      scale.value = withTiming(1, { duration: MOVE_DURATION_MS });
+      scale.value = withTiming(1, { duration });
     }
-  }, [tile.isNew, scale]);
+  }, [tile.isNew, duration, scale]);
 
   useEffect(() => {
     if (tile.justMerged) {
@@ -43,14 +46,14 @@ export function Tile({ tile }: Props) {
 
   useEffect(() => {
     if (tile.merging) {
-      opacity.value = withTiming(0, { duration: MOVE_DURATION_MS });
+      opacity.value = withTiming(0, { duration });
     }
-  }, [tile.merging, opacity]);
+  }, [tile.merging, duration, opacity]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [
-      { translateX: x.value },
-      { translateY: y.value },
+      { translateX: tx.value },
+      { translateY: ty.value },
       { scale: scale.value },
     ],
     opacity: opacity.value,
@@ -63,15 +66,20 @@ export function Tile({ tile }: Props) {
     <Animated.View
       style={[
         styles.tile,
-        { backgroundColor: colors.background, zIndex },
+        {
+          width: size,
+          height: size,
+          borderRadius: size * 0.12,
+          backgroundColor: colors.background,
+          zIndex,
+        },
         animatedStyle,
       ]}
     >
       <Text
-        style={[
-          styles.value,
-          { color: colors.color, fontSize: fontSizeForValue(tile.value) },
-        ]}
+        style={[styles.value, { color: colors.color, fontSize }]}
+        numberOfLines={1}
+        adjustsFontSizeToFit
       >
         {tile.value}
       </Text>
@@ -79,16 +87,29 @@ export function Tile({ tile }: Props) {
   );
 }
 
+export const Tile = memo(
+  TileView,
+  (prev, next) =>
+    prev.tile.id === next.tile.id &&
+    prev.tile.value === next.tile.value &&
+    prev.x === next.x &&
+    prev.y === next.y &&
+    prev.size === next.size &&
+    prev.fontSize === next.fontSize &&
+    prev.duration === next.duration &&
+    prev.tile.isNew === next.tile.isNew &&
+    prev.tile.justMerged === next.tile.justMerged &&
+    prev.tile.merging === next.tile.merging,
+);
+
 const styles = StyleSheet.create({
   tile: {
     position: 'absolute',
-    width: cellSize,
-    height: cellSize,
-    borderRadius: 6,
     alignItems: 'center',
     justifyContent: 'center',
   },
   value: {
     fontWeight: '800',
+    maxWidth: '90%',
   },
 });

@@ -19,7 +19,7 @@ Then press `i` for the iOS simulator, `a` for the Android emulator, or scan the 
 |---|---|
 | `npm start` | Start the Expo dev server |
 | `npm run ios` / `npm run android` | Start on a simulator/emulator |
-| `npm test` | Run the game-engine unit tests |
+| `npm run web` | Start in the browser |
 | `npm run typecheck` | Strict TypeScript check |
 | `npm run lint` | Lint with eslint-config-expo |
 
@@ -27,14 +27,16 @@ Then press `i` for the iOS simulator, `a` for the Android emulator, or scan the 
 
 ```
 app/                 expo-router screens (home, game, history)
-src/game/            pure game engine + tests (no UI imports)
+src/game/            pure game engine (no UI imports)
 src/hooks/           useGameController orchestrates engine + store + persistence
 src/store/           zustand state (game, stats)
 src/features/        UI: board, tiles, HUD
+src/components/ui/   shared primitives (Button, Overlay)
 src/data/            AsyncStorage repositories (saved game, scoreboard)
 src/services/        auth (device id), score, leaderboard (Phase 2 seam)
+src/lib/             platform-safe wrappers (haptics)
 src/shared/          shared types and zod schemas
-src/theme/           colors and layout metrics
+src/theme/           colors (light/dark), tiles, tokens, responsive layout
 ```
 
 See [docs/PLAN.md](docs/PLAN.md) for the full plan and Phase 2 roadmap.

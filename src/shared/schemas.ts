@@ -10,6 +10,13 @@ export const TileSchema = z.object({
   merging: z.boolean().optional(),
 });
 
+export const GameSettingsSchema = z.object({
+  gridSize: z.number(),
+  startTiles: z.number(),
+  winTarget: z.number(),
+  animationSpeed: z.enum(['normal', 'fast']),
+});
+
 export const SavedGameSchema = z.object({
   tiles: z.array(TileSchema),
   score: z.number(),
@@ -18,6 +25,8 @@ export const SavedGameSchema = z.object({
   status: z.enum(['playing', 'won']),
   keepPlaying: z.boolean(),
   nextTileId: z.number(),
+  gridSize: z.number(),
+  winTarget: z.number(),
 });
 
 export const ScoreEntrySchema = z.object({
@@ -36,6 +45,7 @@ export const ScoreBoardSchema = z.object({
   history: z.array(ScoreEntrySchema),
 });
 
+export type GameSettings = z.infer<typeof GameSettingsSchema>;
 export type SavedGame = z.infer<typeof SavedGameSchema>;
 export type ScoreEntry = z.infer<typeof ScoreEntrySchema>;
 export type ScoreBoard = z.infer<typeof ScoreBoardSchema>;

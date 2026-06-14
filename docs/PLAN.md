@@ -126,12 +126,15 @@ npx expo start
 
 Press `i` (iOS simulator), `a` (Android emulator), or scan the QR with Expo Go.
 
-## Testing
+## Quality checks
 
 ```
-npm test          # engine unit tests
-npm run typecheck # strict TypeScript
+npm run typecheck   # strict TypeScript
+npm run lint        # eslint-config-expo
 ```
+
+This version ships without unit tests to stay lightweight. The engine in `src/game/` is pure and
+test-ready; reintroduce tests before public launch / Phase 2.
 
 ## Store submission checklist (before release)
 

@@ -1,5 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native';
-import { palette } from '@/theme/colors';
+import type { Colors } from '@/theme/colors';
+import { useThemedStyles } from '@/theme/useTheme';
+import { font, layout, radius, spacing } from '@/theme/tokens';
 import { useGameStore } from '@/store/game-store';
 import { useStatsStore } from '@/store/stats-store';
 
@@ -9,15 +11,19 @@ interface StatProps {
 }
 
 function Stat({ label, value }: StatProps) {
+  const styles = useThemedStyles(makeStyles);
   return (
     <View style={styles.stat}>
       <Text style={styles.label}>{label}</Text>
-      <Text style={styles.value}>{value}</Text>
+      <Text style={styles.value} numberOfLines={1} adjustsFontSizeToFit>
+        {value}
+      </Text>
     </View>
   );
 }
 
 export function ScorePanel() {
+  const styles = useThemedStyles(makeStyles);
   const score = useGameStore((state) => state.score);
   const best = useStatsStore((state) => state.best);
   return (
@@ -28,28 +34,36 @@ export function ScorePanel() {
   );
 }
 
-const styles = StyleSheet.create({
-  row: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  stat: {
-    backgroundColor: palette.card,
-    borderRadius: 8,
-    paddingVertical: 8,
-    paddingHorizontal: 22,
-    alignItems: 'center',
-    minWidth: 96,
-  },
-  label: {
-    color: palette.textInverse,
-    fontSize: 12,
-    fontWeight: '700',
-    letterSpacing: 1,
-  },
-  value: {
-    color: palette.textInverse,
-    fontSize: 24,
-    fontWeight: '800',
-  },
-});
+const makeStyles = (colors: Colors) =>
+  StyleSheet.create({
+    row: {
+      width: '100%',
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      justifyContent: 'center',
+      gap: spacing.md,
+    },
+    stat: {
+      backgroundColor: colors.cardNavy,
+      borderRadius: radius.md,
+      paddingVertical: spacing.sm,
+      paddingHorizontal: spacing.xl,
+      alignItems: 'center',
+      minWidth: layout.scoreStatMinWidth,
+      maxWidth: layout.scoreStatMaxWidth,
+      flexGrow: 1,
+      flexShrink: 1,
+    },
+    label: {
+      color: colors.textInverse,
+      fontSize: font.xs,
+      fontWeight: '700',
+      letterSpacing: 1,
+    },
+    value: {
+      color: colors.textInverse,
+      fontSize: font.lg,
+      fontWeight: '800',
+      maxWidth: '100%',
+    },
+  });

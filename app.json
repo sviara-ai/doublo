@@ -3,9 +3,9 @@
     "name": "Doublo",
     "slug": "doublo",
     "version": "1.0.0",
-    "orientation": "portrait",
+    "orientation": "default",
     "scheme": "doublo",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "assetBundlePatterns": [
       "**/*"

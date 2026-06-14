@@ -1,37 +1,53 @@
-export const palette = {
-  background: '#faf8ef',
-  boardBackground: '#bbada0',
-  emptyCell: 'rgba(238, 228, 218, 0.35)',
-  text: '#776e65',
-  textInverse: '#f9f6f2',
-  muted: '#a39689',
-  button: '#8f7a66',
-  buttonText: '#f9f6f2',
-  card: '#bbada0',
-  overlay: 'rgba(250, 248, 239, 0.9)',
-};
-
-interface TileColor {
+export interface Colors {
+  brandBlue: string;
+  brandNavy: string;
+  brandInk: string;
   background: string;
-  color: string;
+  surface: string;
+  board: string;
+  boardCell: string;
+  primary: string;
+  primaryPressed: string;
+  text: string;
+  textMuted: string;
+  textInverse: string;
+  cardNavy: string;
+  overlay: string;
+  hairline: string;
 }
 
-const tileColors: Record<number, TileColor> = {
-  2: { background: '#eee4da', color: '#776e65' },
-  4: { background: '#ede0c8', color: '#776e65' },
-  8: { background: '#f2b179', color: '#f9f6f2' },
-  16: { background: '#f59563', color: '#f9f6f2' },
-  32: { background: '#f67c5f', color: '#f9f6f2' },
-  64: { background: '#f65e3b', color: '#f9f6f2' },
-  128: { background: '#edcf72', color: '#f9f6f2' },
-  256: { background: '#edcc61', color: '#f9f6f2' },
-  512: { background: '#edc850', color: '#f9f6f2' },
-  1024: { background: '#edc53f', color: '#f9f6f2' },
-  2048: { background: '#edc22e', color: '#f9f6f2' },
+export const lightColors: Colors = {
+  brandBlue: '#0060C7',
+  brandNavy: '#101A86',
+  brandInk: '#00163F',
+  background: '#F3F7FE',
+  surface: '#FFFFFF',
+  board: '#CBDAF2',
+  boardCell: '#E4EDFB',
+  primary: '#0060C7',
+  primaryPressed: '#0852A8',
+  text: '#00163F',
+  textMuted: '#5B6B8C',
+  textInverse: '#FFFFFF',
+  cardNavy: '#101A86',
+  overlay: 'rgba(243, 247, 254, 0.93)',
+  hairline: '#D4E0F4',
 };
 
-const superTile: TileColor = { background: '#3c3a32', color: '#f9f6f2' };
-
-export function tileColor(value: number): TileColor {
-  return tileColors[value] ?? superTile;
-}
+export const darkColors: Colors = {
+  brandBlue: '#0060C7',
+  brandNavy: '#101A86',
+  brandInk: '#00163F',
+  background: '#0A1124',
+  surface: '#121C36',
+  board: '#18243F',
+  boardCell: '#243352',
+  primary: '#3B82E8',
+  primaryPressed: '#2C66BE',
+  text: '#EAF1FC',
+  textMuted: '#9AA8C8',
+  textInverse: '#FFFFFF',
+  cardNavy: '#1E2C6E',
+  overlay: 'rgba(10, 17, 36, 0.92)',
+  hairline: '#2A3756',
+};

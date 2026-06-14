@@ -1,23 +1,63 @@
-import { Gesture } from 'react-native-gesture-handler';
-import { runOnJS } from 'react-native-reanimated';
+import { useMemo } from 'react';
+import { PanResponder } from 'react-native';
+import type { PanResponderGestureState } from 'react-native';
 import type { Direction } from '@/shared/types';
 
-const SWIPE_THRESHOLD = 24;
+const CLAIM_THRESHOLD = 8;
+const SWIPE_THRESHOLD = 16;
 
-export function createSwipeGesture(onSwipe: (direction: Direction) => void) {
-  return Gesture.Pan().onEnd((event) => {
-    'worklet';
-    const { translationX, translationY } = event;
-    if (
-      Math.abs(translationX) < SWIPE_THRESHOLD &&
-      Math.abs(translationY) < SWIPE_THRESHOLD
-    ) {
-      return;
-    }
-    if (Math.abs(translationX) > Math.abs(translationY)) {
-      runOnJS(onSwipe)(translationX > 0 ? 'right' : 'left');
-    } else {
-      runOnJS(onSwipe)(translationY > 0 ? 'down' : 'up');
-    }
-  });
+function shouldClaim(gesture: PanResponderGestureState): boolean {
+  return (
+    Math.abs(gesture.dx) > CLAIM_THRESHOLD ||
+    Math.abs(gesture.dy) > CLAIM_THRESHOLD
+  );
+}
+
+function isSwipe(gesture: PanResponderGestureState): boolean {
+  return (
+    Math.abs(gesture.dx) >= SWIPE_THRESHOLD ||
+    Math.abs(gesture.dy) >= SWIPE_THRESHOLD
+  );
+}
+
+function toDirection(gesture: PanResponderGestureState): Direction {
+  if (Math.abs(gesture.dx) > Math.abs(gesture.dy)) {
+    return gesture.dx > 0 ? 'right' : 'left';
+  }
+  return gesture.dy > 0 ? 'down' : 'up';
+}
+
+export function useSwipeGesture(
+  onSwipe: (direction: Direction) => void,
+  enabled: boolean,
+) {
+  return useMemo(() => {
+    let fired = false;
+    return PanResponder.create({
+      onStartShouldSetPanResponder: () => false,
+      onStartShouldSetPanResponderCapture: () => false,
+      onMoveShouldSetPanResponder: (_, gesture) =>
+        enabled && shouldClaim(gesture),
+      onMoveShouldSetPanResponderCapture: (_, gesture) =>
+        enabled && shouldClaim(gesture),
+      onPanResponderGrant: () => {
+        fired = false;
+      },
+      onPanResponderMove: (_, gesture) => {
+        if (!enabled || fired || !isSwipe(gesture)) {
+          return;
+        }
+        fired = true;
+        onSwipe(toDirection(gesture));
+      },
+      onPanResponderRelease: () => {
+        fired = false;
+      },
+      onPanResponderTerminate: () => {
+        fired = false;
+      },
+      onPanResponderTerminationRequest: () => false,
+      onShouldBlockNativeResponder: () => true,
+    }).panHandlers;
+  }, [enabled, onSwipe]);
 }
