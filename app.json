@@ -25,9 +25,6 @@
       "expo-router",
       "expo-asset",
       "expo-font"
-    ],
-    "experiments": {
-      "baseUrl": "/doublo"
-    }
+    ]
   }
 }

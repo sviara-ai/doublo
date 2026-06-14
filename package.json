@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "expo-router/entry",
   "private": true,
-  "homepage": "https://sviara-ai.github.io/doublo",
+  "homepage": "https://doublo.sviara.com",
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
