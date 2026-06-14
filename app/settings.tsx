@@ -74,6 +74,7 @@ export default function SettingsScreen() {
   const startTiles = useSettingsStore((state) => state.startTiles);
   const winTarget = useSettingsStore((state) => state.winTarget);
   const animationSpeed = useSettingsStore((state) => state.animationSpeed);
+  const soundEnabled = useSettingsStore((state) => state.soundEnabled);
   const hydrate = useSettingsStore((state) => state.hydrate);
   const update = useSettingsStore((state) => state.update);
 
@@ -149,6 +150,14 @@ export default function SettingsScreen() {
             void update({
               animationSpeed: option as GameSettings['animationSpeed'],
             });
+          }}
+        />
+        <OptionRow
+          title="Sound"
+          options={['On', 'Off']}
+          value={soundEnabled ? 'On' : 'Off'}
+          onSelect={(option) => {
+            void update({ soundEnabled: option === 'On' });
           }}
         />
 

@@ -15,6 +15,7 @@ export const GameSettingsSchema = z.object({
   startTiles: z.number(),
   winTarget: z.number(),
   animationSpeed: z.enum(['normal', 'fast']),
+  soundEnabled: z.boolean(),
 });
 
 export const SavedGameSchema = z.object({

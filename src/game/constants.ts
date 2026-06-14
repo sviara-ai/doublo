@@ -14,6 +14,7 @@ export const DEFAULT_SETTINGS: GameSettings = {
   startTiles: 2,
   winTarget: 2048,
   animationSpeed: 'normal',
+  soundEnabled: true,
 };
 
 export const MOVE_DURATION_BY_SPEED: Record<

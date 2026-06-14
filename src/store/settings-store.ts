@@ -25,6 +25,7 @@ export const useSettingsStore = create<SettingsState>()((set, get) => ({
       startTiles: get().startTiles,
       winTarget: get().winTarget,
       animationSpeed: get().animationSpeed,
+      soundEnabled: get().soundEnabled,
       ...partial,
     };
     await saveSettings(next);
