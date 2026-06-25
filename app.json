@@ -23,12 +23,12 @@
     "plugins": [
       "expo-router",
       "expo-asset",
-      "expo-font",
-      ["react-native-google-mobile-ads", {
-        "androidAppId": "ca-app-pub-XXXXXXXXXXXXXXXX~XXXXXXXXXX",
-        "iosAppId": "ca-app-pub-XXXXXXXXXXXXXXXX~XXXXXXXXXX",
-        "delayAppMeasurementInit": true
-      }]
-    ]
+      "expo-font"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "73ad3b8b-30d5-4e1e-b9de-f52c1d23ee00"
+      }
+    }
   }
 }
