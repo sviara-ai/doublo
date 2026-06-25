@@ -2,6 +2,7 @@
   "expo": {
     "name": "Doublo",
     "slug": "doublo",
+    "owner": "sviara",
     "version": "1.0.0",
     "orientation": "default",
     "scheme": "doublo",
