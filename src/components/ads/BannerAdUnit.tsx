@@ -1,20 +1,14 @@
 import { Platform, View, StyleSheet } from 'react-native';
-import {
-  BannerAd,
-  BannerAdSize,
-  TestIds,
-} from 'react-native-google-mobile-ads';
+import { BannerAd, BannerAdSize, TestIds } from 'react-native-google-mobile-ads';
 
-// TODO: Replace with your real Banner ad unit ID from AdMob console
-// AdMob -> your app -> Ad units -> Create ad unit -> Banner
-const PRODUCTION_BANNER_ID = 'ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX';
-
-const adUnitId = __DEV__ ? TestIds.ADAPTIVE_BANNER : PRODUCTION_BANNER_ID;
+// Set EXPO_PUBLIC_ADMOB_BANNER_ID as an EAS secret — never commit real values.
+// Falls back to Google's public test ID in dev and when the var is absent.
+const adUnitId = __DEV__
+  ? TestIds.ADAPTIVE_BANNER
+  : (process.env.EXPO_PUBLIC_ADMOB_BANNER_ID ?? TestIds.ADAPTIVE_BANNER);
 
 export function BannerAdUnit() {
-  // Do not render on web — AdMob is native-only
-  if (Platform.OS === 'web') return null;
-
+  if (Platform.OS === 'web') return null; // also handled by BannerAdUnit.web.tsx
   return (
     <View style={styles.container}>
       <BannerAd
@@ -27,8 +21,5 @@ export function BannerAdUnit() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    alignItems: 'center',
-    width: '100%',
-  },
+  container: { alignItems: 'center', width: '100%' },
 });
