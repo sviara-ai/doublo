@@ -11,6 +11,7 @@ import { Header } from '@/features/hud/Header';
 import { ScorePanel } from '@/features/hud/ScorePanel';
 import { Overlay } from '@/components/ui/Overlay';
 import { useGameController } from '@/hooks/useGameController';
+import { useInterstitialAd } from '@/hooks/useInterstitialAd';
 import { goHomeOrBack } from '@/lib/navigation';
 import { useGameStore } from '@/store/game-store';
 import type { Colors } from '@/theme/colors';
@@ -25,6 +26,7 @@ function contentJustify(isShort: boolean): ViewStyle['justifyContent'] {
 export default function GameScreen() {
   const router = useRouter();
   const { move, newGame, undo, continueAfterWin } = useGameController();
+  const { showAdThenCallback } = useInterstitialAd();
   const tiles = useGameStore((state) => state.tiles);
   const status = useGameStore((state) => state.status);
   const canUndo = useGameStore(
@@ -39,12 +41,12 @@ export default function GameScreen() {
 
   const [overlayDismissed, setOverlayDismissed] = useState(false);
   useEffect(() => {
-    if (status === 'playing') {
-      setOverlayDismissed(false);
-    }
+    if (status === 'playing') setOverlayDismissed(false);
   }, [status]);
   const closeOverlay = () => setOverlayDismissed(true);
   const showOverlay = !isPlaying && !overlayDismissed;
+
+  const handleNewGame = () => showAdThenCallback(newGame);
 
   return (
     <SafeAreaView edges={['top', 'left', 'right']} style={styles.safe}>
@@ -62,13 +64,11 @@ export default function GameScreen() {
             },
           ]}
         >
-          <Header onBack={() => goHomeOrBack(router)} onRestart={newGame} />
+          <Header onBack={() => goHomeOrBack(router)} onRestart={handleNewGame} />
           <ScorePanel />
           <ControlBar
             canUndo={canUndo}
-            onUndo={() => {
-              void undo();
-            }}
+            onUndo={() => { void undo(); }}
             onSettings={() => router.push('/settings')}
           />
           <Board tiles={tiles}>
@@ -76,7 +76,7 @@ export default function GameScreen() {
               <Overlay
                 title="Game Over"
                 actionLabel="New Game"
-                onAction={newGame}
+                onAction={handleNewGame}
                 onClose={closeOverlay}
               />
             ) : null}
@@ -86,7 +86,7 @@ export default function GameScreen() {
                 actionLabel="Keep Going"
                 onAction={continueAfterWin}
                 secondaryLabel="New Game"
-                onSecondary={newGame}
+                onSecondary={handleNewGame}
                 onClose={closeOverlay}
               />
             ) : null}
@@ -104,27 +104,12 @@ export default function GameScreen() {
 
 const makeStyles = (colors: Colors) =>
   StyleSheet.create({
-    safe: {
-      flex: 1,
-      backgroundColor: colors.background,
-    },
-    container: {
-      flex: 1,
-      width: '100%',
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
+    safe: { flex: 1, backgroundColor: colors.background },
+    container: { flex: 1, width: '100%', alignItems: 'center', justifyContent: 'center' },
     content: {
-      flex: 1,
-      width: '100%',
-      alignItems: 'center',
-      paddingHorizontal: spacing.lg,
-      paddingVertical: spacing.xl,
-      gap: spacing.sm,
-      userSelect: 'none',
+      flex: 1, width: '100%', alignItems: 'center',
+      paddingHorizontal: spacing.lg, paddingVertical: spacing.xl,
+      gap: spacing.sm, userSelect: 'none',
     },
-    hint: {
-      fontSize: font.sm,
-      color: colors.textMuted,
-    },
+    hint: { fontSize: font.sm, color: colors.textMuted },
   });
