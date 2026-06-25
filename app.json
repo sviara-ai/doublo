@@ -7,24 +7,28 @@
     "scheme": "doublo",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.sviara.doublo"
     },
     "android": {
-      "package": "com.sviara.doublo"
+      "package": "com.sviara.doublo",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      }
     },
-    "web": {
-      "bundler": "metro",
-      "output": "static"
-    },
+    "web": { "bundler": "metro", "output": "static" },
     "plugins": [
       "expo-router",
       "expo-asset",
-      "expo-font"
+      "expo-font",
+      ["react-native-google-mobile-ads", {
+        "androidAppId": "ca-app-pub-XXXXXXXXXXXXXXXX~XXXXXXXXXX",
+        "iosAppId": "ca-app-pub-XXXXXXXXXXXXXXXX~XXXXXXXXXX",
+        "delayAppMeasurementInit": true
+      }]
     ]
   }
 }
