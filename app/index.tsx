@@ -3,6 +3,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Button } from '@/components/ui/Button';
+import { BannerAdUnit } from '@/components/ads/BannerAdUnit';
 import type { Colors } from '@/theme/colors';
 import { useScreenMetrics } from '@/theme/layout';
 import { useThemedStyles } from '@/theme/useTheme';
@@ -81,94 +82,39 @@ export default function HomeScreen() {
           />
         </View>
       </ScrollView>
+
+      {/* Banner ad anchored to the bottom of the home screen */}
+      <BannerAdUnit />
     </SafeAreaView>
   );
 }
 
 const makeStyles = (colors: Colors) =>
   StyleSheet.create({
-    safe: {
-      flex: 1,
-      backgroundColor: colors.background,
-    },
-    scroll: {
-      flex: 1,
-      width: '100%',
-    },
+    safe: { flex: 1, backgroundColor: colors.background },
+    scroll: { flex: 1, width: '100%' },
     content: {
-      flexGrow: 1,
-      width: '100%',
-      maxWidth: layout.maxContentWidth,
-      alignSelf: 'center',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: spacing.xxl,
-      paddingHorizontal: spacing.xl,
-      paddingVertical: spacing.xxl,
+      flexGrow: 1, width: '100%', maxWidth: layout.maxContentWidth,
+      alignSelf: 'center', alignItems: 'center', justifyContent: 'center',
+      gap: spacing.xxl, paddingHorizontal: spacing.xl, paddingVertical: spacing.xxl,
     },
-    hero: {
-      alignItems: 'center',
-      gap: spacing.md,
-    },
+    hero: { alignItems: 'center', gap: spacing.md },
     logo: {
-      width: 96,
-      height: 96,
-      borderRadius: radius.lg,
-      backgroundColor: colors.primary,
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginBottom: spacing.sm,
+      width: 96, height: 96, borderRadius: radius.lg,
+      backgroundColor: colors.primary, alignItems: 'center',
+      justifyContent: 'center', marginBottom: spacing.sm,
     },
-    logoText: {
-      color: colors.textInverse,
-      fontSize: font.lg,
-      fontWeight: '800',
-    },
-    title: {
-      fontSize: font.hero,
-      fontWeight: '800',
-      color: colors.text,
-      letterSpacing: 0.5,
-    },
-    titleCompact: {
-      fontSize: font.title,
-    },
-    tagline: {
-      fontSize: font.md,
-      color: colors.textMuted,
-      textAlign: 'center',
-    },
-    stats: {
-      flexDirection: 'row',
-      justifyContent: 'center',
-      gap: spacing.md,
-    },
+    logoText: { color: colors.textInverse, fontSize: font.lg, fontWeight: '800' },
+    title: { fontSize: font.hero, fontWeight: '800', color: colors.text, letterSpacing: 0.5 },
+    titleCompact: { fontSize: font.title },
+    tagline: { fontSize: font.md, color: colors.textMuted, textAlign: 'center' },
+    stats: { flexDirection: 'row', justifyContent: 'center', gap: spacing.md },
     statCard: {
-      minWidth: layout.scoreStatMinWidth,
-      alignItems: 'center',
-      backgroundColor: colors.surface,
-      borderWidth: 1,
-      borderColor: colors.hairline,
-      borderRadius: radius.md,
-      paddingVertical: spacing.md,
-      paddingHorizontal: spacing.xl,
+      minWidth: layout.scoreStatMinWidth, alignItems: 'center',
+      backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.hairline,
+      borderRadius: radius.md, paddingVertical: spacing.md, paddingHorizontal: spacing.xl,
     },
-    statLabel: {
-      color: colors.textMuted,
-      fontSize: font.xs,
-      fontWeight: '700',
-      letterSpacing: 1,
-    },
-    statValue: {
-      color: colors.text,
-      fontSize: font.xl,
-      fontWeight: '800',
-      maxWidth: '100%',
-    },
-    actions: {
-      width: '100%',
-      maxWidth: layout.maxButtonWidth,
-      alignItems: 'center',
-      gap: spacing.md,
-    },
+    statLabel: { color: colors.textMuted, fontSize: font.xs, fontWeight: '700', letterSpacing: 1 },
+    statValue: { color: colors.text, fontSize: font.xl, fontWeight: '800', maxWidth: '100%' },
+    actions: { width: '100%', maxWidth: layout.maxButtonWidth, alignItems: 'center', gap: spacing.md },
   });
