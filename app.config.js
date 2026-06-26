@@ -13,6 +13,7 @@ module.exports = {
       foregroundImage: './assets/adaptive-icon.png',
       backgroundColor: '#1a1a2e',
     },
+      targetSdkVersion: 35,
   },
   web: {
     ...baseConfig.expo.web,
