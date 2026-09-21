@@ -17,6 +17,11 @@ export interface Colors {
   cardNavy: string;
   overlay: string;
   hairline: string;
+  shadow: string;
+  track: string;
+  segmentActive: string;
+  hover: string;
+  focusRing: string;
 }
 
 export const lightColors: Colors = {
@@ -38,6 +43,11 @@ export const lightColors: Colors = {
   cardNavy: '#101A86',
   overlay: 'rgba(243, 247, 254, 0.93)',
   hairline: '#D4E0F4',
+  shadow: 'rgba(10, 27, 61, 0.10)',
+  track: '#E4EDFB',
+  segmentActive: '#FFFFFF',
+  hover: '#EDF3FD',
+  focusRing: '#0060C7',
 };
 
 export const darkColors: Colors = {
@@ -59,4 +69,9 @@ export const darkColors: Colors = {
   cardNavy: '#1E2C6E',
   overlay: 'rgba(10, 17, 36, 0.92)',
   hairline: '#2A3756',
+  shadow: 'rgba(0, 0, 0, 0.45)',
+  track: '#141F38',
+  segmentActive: '#2C3F66',
+  hover: '#1B2947',
+  focusRing: '#6FA6F5',
 };

@@ -35,10 +35,30 @@ export const layout = {
   minTouchTarget: 48,
   optionMinHeight: 44,
   optionMinWidth: 64,
+  segmentHeight: 38,
+  brandMarkSize: 52,
+  iconButtonSize: 36,
+  headerSideWidth: 72,
   trophyBadgeMinWidth: 54,
-  modeCardMinWidth: 150,
+  modeCardMinWidth: 148,
+  modeCardMinHeight: 74,
   landscapeColumnGap: 28,
   landscapeSidebarWidth: 240,
+};
+
+export const elevation = {
+  card: {
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 1,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  raised: {
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 12,
+    elevation: 6,
+  },
 };
 
 export const motion = {

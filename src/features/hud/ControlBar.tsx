@@ -50,9 +50,9 @@ export function ControlBar({ canUndo, onUndo, onSettings }: Props) {
           <Text style={styles.badgeLabel}>RANKED · NO UNDO</Text>
         </View>
       ) : (
-        <Chip label="↶ Undo (Ad)" onPress={onUndo} disabled={!canUndo} />
+        <Chip label="Undo (Ad)" onPress={onUndo} disabled={!canUndo} />
       )}
-      <Chip label="⚙ Settings" onPress={onSettings} />
+      <Chip label="Settings" onPress={onSettings} />
     </View>
   );
 }

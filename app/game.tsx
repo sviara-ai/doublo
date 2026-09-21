@@ -9,8 +9,8 @@ import { useSwipeGesture } from '@/features/board/useBoardGesture';
 import { ControlBar } from '@/features/hud/ControlBar';
 import { Header } from '@/features/hud/Header';
 import { ScorePanel } from '@/features/hud/ScorePanel';
-import { TimerPanel } from '@/features/hud/TimerPanel';
 import { TrophyToast } from '@/features/trophies/TrophyToast';
+import { Card } from '@/components/ui/Card';
 import { Overlay } from '@/components/ui/Overlay';
 import { MODE_OPTIONS } from '@/game/constants';
 import type { GameMode } from '@/shared/types';
@@ -71,15 +71,17 @@ export default function GameScreen() {
   const hud = (
     <>
       <Header onBack={() => goHomeOrBack(router)} onRestart={handleNewGame} />
-      <ScorePanel />
-      <TimerPanel />
-      <ControlBar
-        canUndo={canUndo}
-        onUndo={() => {
-          void undo();
-        }}
-        onSettings={() => router.push('/settings')}
-      />
+      <Card style={styles.hud}>
+        <ScorePanel />
+        <View style={styles.hudDivider} />
+        <ControlBar
+          canUndo={canUndo}
+          onUndo={() => {
+            void undo();
+          }}
+          onSettings={() => router.push('/settings')}
+        />
+      </Card>
     </>
   );
 
@@ -190,6 +192,15 @@ const makeStyles = (colors: Colors) =>
       alignItems: 'center',
       justifyContent: 'center',
       gap: spacing.md,
+    },
+    hud: {
+      paddingVertical: spacing.md,
+      gap: spacing.sm,
+    },
+    hudDivider: {
+      height: 1,
+      width: '100%',
+      backgroundColor: colors.hairline,
     },
     hint: { fontSize: font.sm, color: colors.textMuted },
   });

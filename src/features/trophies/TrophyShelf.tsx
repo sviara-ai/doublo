@@ -42,6 +42,7 @@ export function TrophyShelf() {
 const makeStyles = (colors: Colors) =>
   StyleSheet.create({
     wrap: {
+      width: '100%',
       alignItems: 'center',
       gap: spacing.sm,
     },
@@ -52,6 +53,7 @@ const makeStyles = (colors: Colors) =>
       letterSpacing: 1,
     },
     row: {
+      width: '100%',
       flexDirection: 'row',
       flexWrap: 'wrap',
       justifyContent: 'center',
@@ -59,7 +61,9 @@ const makeStyles = (colors: Colors) =>
     },
     badge: {
       minWidth: layout.trophyBadgeMinWidth,
-      paddingVertical: spacing.xs,
+      flexGrow: 1,
+      flexBasis: '28%',
+      paddingVertical: spacing.sm,
       paddingHorizontal: spacing.sm,
       borderRadius: radius.sm,
       borderWidth: 1,

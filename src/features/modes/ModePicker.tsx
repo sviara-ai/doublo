@@ -19,7 +19,6 @@ export function ModePicker({ value, onChange }: Props) {
   const styles = useThemedStyles(makeStyles);
   return (
     <View style={styles.wrap} accessibilityRole="radiogroup">
-      <Text style={styles.heading}>MODE</Text>
       <View style={styles.row}>
         {MODE_OPTIONS.map((mode) => {
           const selected = mode === value;
@@ -29,6 +28,7 @@ export function ModePicker({ value, onChange }: Props) {
               accessibilityRole="radio"
               accessibilityLabel={`${MODE_LABELS[mode]}. ${MODE_DESCRIPTIONS[mode]}`}
               accessibilityState={{ selected, checked: selected }}
+              aria-checked={selected}
               onPress={() => {
                 clearWebFocus();
                 onChange(mode);
@@ -62,37 +62,30 @@ export function ModePicker({ value, onChange }: Props) {
   );
 }
 
+
 const makeStyles = (colors: Colors) =>
   StyleSheet.create({
     wrap: {
       width: '100%',
-      alignItems: 'center',
-      gap: spacing.sm,
-    },
-    heading: {
-      color: colors.textMuted,
-      fontSize: font.xs,
-      fontWeight: '700',
-      letterSpacing: 1,
     },
     row: {
       flexDirection: 'row',
       flexWrap: 'wrap',
-      justifyContent: 'center',
       gap: spacing.sm,
     },
     card: {
       minWidth: layout.modeCardMinWidth,
+      minHeight: layout.modeCardMinHeight,
       flexGrow: 1,
-      flexBasis: layout.modeCardMinWidth,
-      maxWidth: layout.maxButtonWidth,
+      flexBasis: 0,
       paddingVertical: spacing.sm,
       paddingHorizontal: spacing.md,
       borderRadius: radius.md,
       borderWidth: 1,
       borderColor: colors.hairline,
-      backgroundColor: colors.surface,
+      backgroundColor: colors.track,
       gap: spacing.xs,
+      justifyContent: 'center',
     },
     cardPressed: {
       backgroundColor: colors.boardCell,

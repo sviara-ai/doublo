@@ -2,7 +2,8 @@ import { useEffect } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
+import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { config } from '@/config';
 import { MODE_LABELS } from '@/game/constants';
 import { formatDuration, formatPlayedAt } from '@/lib/format';
@@ -27,7 +28,12 @@ function Summary({ label, value }: SummaryProps) {
       accessibilityLabel={`${label} ${value}`}
       style={styles.summaryItem}
     >
-      <Text style={styles.summaryValue} importantForAccessibility="no">
+      <Text
+        style={styles.summaryValue}
+        numberOfLines={1}
+        adjustsFontSizeToFit
+        importantForAccessibility="no"
+      >
         {value}
       </Text>
       <Text style={styles.summaryLabel} importantForAccessibility="no">
@@ -58,25 +64,26 @@ export default function HistoryScreen() {
           {
             maxWidth: metrics.contentMaxWidth,
             paddingHorizontal: metrics.horizontalPadding + spacing.sm,
-            paddingVertical: metrics.isShort ? spacing.lg : spacing.xl,
+            paddingBottom: metrics.isShort ? spacing.lg : spacing.xl,
           },
         ]}
       >
-        <Text
-          accessibilityRole="header"
-          style={[styles.title, metrics.isNarrow && styles.titleCompact]}
-          numberOfLines={1}
-          adjustsFontSizeToFit
-        >
-          Scores
-        </Text>
-        <View style={styles.summary}>
-          <Summary label="Best" value={best} />
-          <Summary label="Games" value={gamesPlayed} />
-        </View>
-        {config.onlineEnabled ? null : (
-          <Text style={styles.soon}>Global leaderboard coming soon</Text>
-        )}
+        <ScreenHeader title="Scores" onBack={() => goHomeOrBack(router)} />
+
+        <Card title="SUMMARY">
+          <View style={styles.summary}>
+            <Summary label="BEST" value={best} />
+            <View style={styles.divider} />
+            <Summary label="GAMES" value={gamesPlayed} />
+          </View>
+          {config.onlineEnabled ? null : (
+            <Text style={styles.soon}>
+              Global leaderboard coming soon. Only Pure games will rank.
+            </Text>
+          )}
+        </Card>
+
+        <Text style={styles.listHeading}>RECENT GAMES</Text>
         <FlatList
           style={styles.list}
           data={history}
@@ -84,7 +91,9 @@ export default function HistoryScreen() {
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={
-            <Text style={styles.empty}>No games yet. Play your first round!</Text>
+            <Text style={styles.empty}>
+              No games yet. Play your first round!
+            </Text>
           }
           renderItem={({ item }) => (
             <View
@@ -93,31 +102,33 @@ export default function HistoryScreen() {
               accessibilityLabel={`${item.score} points, highest tile ${item.maxTile}, ${item.moves} moves, played ${formatPlayedAt(item.createdAt)}`}
               style={styles.entry}
             >
-              <Text
-                style={styles.entryScore}
-                numberOfLines={1}
-                adjustsFontSizeToFit
-                importantForAccessibility="no"
-              >
-                {item.score}
-              </Text>
+              <View style={styles.entryMain} importantForAccessibility="no">
+                <Text
+                  style={styles.entryScore}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                >
+                  {item.score}
+                </Text>
+                {item.mode ? (
+                  <View style={styles.modeTag}>
+                    <Text style={styles.modeTagLabel}>
+                      {MODE_LABELS[item.mode]}
+                    </Text>
+                  </View>
+                ) : null}
+              </View>
               <View style={styles.entryDetail} importantForAccessibility="no">
                 <Text style={styles.entryMeta}>
                   max {item.maxTile} · {item.moves} moves
                 </Text>
                 <Text style={styles.entryDate}>
-                  {item.mode ? `${MODE_LABELS[item.mode]} · ` : ''}
                   {formatPlayedAt(item.createdAt)} ·{' '}
                   {formatDuration(item.durationMs)}
                 </Text>
               </View>
             </View>
           )}
-        />
-        <Button
-          label="Back"
-          variant="ghost"
-          onPress={() => goHomeOrBack(router)}
         />
       </View>
     </SafeAreaView>
@@ -126,61 +137,55 @@ export default function HistoryScreen() {
 
 const makeStyles = (colors: Colors) =>
   StyleSheet.create({
-    safe: {
-      flex: 1,
-      backgroundColor: colors.background,
-    },
+    safe: { flex: 1, backgroundColor: colors.background },
     content: {
       flex: 1,
       width: '100%',
       maxWidth: layout.maxContentWidth,
       alignSelf: 'center',
-      paddingHorizontal: spacing.xl,
-      paddingVertical: spacing.xl,
-    },
-    title: {
-      fontSize: font.title,
-      fontWeight: '800',
-      color: colors.text,
-      textAlign: 'center',
-    },
-    titleCompact: {
-      fontSize: font.xl,
+      gap: spacing.md,
     },
     summary: {
       flexDirection: 'row',
-      flexWrap: 'wrap',
-      justifyContent: 'center',
-      gap: spacing.lg,
-      marginTop: spacing.lg,
+      alignItems: 'center',
     },
     summaryItem: {
-      backgroundColor: colors.cardNavy,
-      borderRadius: radius.md,
-      paddingVertical: spacing.md,
-      paddingHorizontal: spacing.xl,
+      flex: 1,
       alignItems: 'center',
-      minWidth: layout.summaryMinWidth,
+      gap: spacing.xs / 2,
     },
     summaryValue: {
-      color: colors.textInverse,
+      color: colors.text,
       fontSize: font.xl,
       fontWeight: '800',
+      maxWidth: '100%',
     },
     summaryLabel: {
-      color: colors.textInverse,
+      color: colors.textMuted,
       fontSize: font.xs,
       fontWeight: '700',
       letterSpacing: 1,
     },
+    divider: {
+      width: 1,
+      alignSelf: 'stretch',
+      backgroundColor: colors.hairline,
+    },
     soon: {
       textAlign: 'center',
       color: colors.textMuted,
-      marginTop: spacing.lg,
+      fontSize: font.xs,
+      fontWeight: '600',
+    },
+    listHeading: {
+      color: colors.textMuted,
+      fontSize: font.xs,
+      fontWeight: '700',
+      letterSpacing: 1,
+      paddingHorizontal: spacing.xs,
     },
     list: {
       flex: 1,
-      marginTop: spacing.lg,
     },
     listContent: {
       gap: spacing.sm,
@@ -196,18 +201,33 @@ const makeStyles = (colors: Colors) =>
       borderRadius: radius.md,
       borderWidth: 1,
       borderColor: colors.hairline,
-      padding: spacing.lg,
+      paddingVertical: spacing.md,
+      paddingHorizontal: spacing.lg,
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
       gap: spacing.md,
     },
+    entryMain: {
+      flexShrink: 1,
+      gap: spacing.xs,
+      alignItems: 'flex-start',
+    },
     entryScore: {
       fontSize: font.lg,
       fontWeight: '800',
       color: colors.text,
-      flexShrink: 1,
-      minWidth: 72,
+    },
+    modeTag: {
+      borderRadius: radius.sm,
+      backgroundColor: colors.track,
+      paddingHorizontal: spacing.sm,
+      paddingVertical: spacing.xs / 2,
+    },
+    modeTagLabel: {
+      color: colors.textMuted,
+      fontSize: font.xs,
+      fontWeight: '700',
     },
     entryDetail: {
       flexShrink: 1,

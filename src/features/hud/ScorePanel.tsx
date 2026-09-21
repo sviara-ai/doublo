@@ -1,4 +1,4 @@
-import { useEffect, useRef, type ReactNode } from 'react';
+import { useEffect, useRef } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, {
   useAnimatedStyle,
@@ -7,30 +7,32 @@ import Animated, {
   withSequence,
   withTiming,
 } from 'react-native-reanimated';
+import { TIME_ATTACK_WARNING_MS } from '@/game/constants';
+import { formatClock } from '@/lib/format';
 import type { Colors } from '@/theme/colors';
 import { useThemedStyles } from '@/theme/useTheme';
-import { font, layout, motion, radius, spacing } from '@/theme/tokens';
+import { font, motion, spacing } from '@/theme/tokens';
 import { useGameStore } from '@/store/game-store';
 import { useStatsStore } from '@/store/stats-store';
 
-interface StatProps {
-  label: string;
-  value: number;
-  children?: ReactNode;
+function Divider() {
+  const styles = useThemedStyles(makeStyles);
+  return <View style={styles.divider} />;
 }
 
-function Stat({ label, value, children }: StatProps) {
+function ScoreStat() {
   const styles = useThemedStyles(makeStyles);
+  const score = useGameStore((state) => state.score);
   return (
     <View
       accessible
       accessibilityRole="text"
-      accessibilityLabel={`${label} ${value}`}
+      accessibilityLabel={`Score ${score}`}
       accessibilityLiveRegion="polite"
       style={styles.stat}
     >
       <Text style={styles.label} importantForAccessibility="no">
-        {label}
+        SCORE
       </Text>
       <Text
         style={styles.value}
@@ -38,9 +40,9 @@ function Stat({ label, value, children }: StatProps) {
         adjustsFontSizeToFit
         importantForAccessibility="no"
       >
-        {value}
+        {score}
       </Text>
-      {children}
+      <ScoreGain />
     </View>
   );
 }
@@ -88,44 +90,97 @@ function ScoreGain() {
 }
 
 function BestStat() {
-  const best = useStatsStore((state) => state.best);
   const styles = useThemedStyles(makeStyles);
+  const best = useStatsStore((state) => state.best);
+  const loaded = useStatsStore((state) => state.loaded);
   const reducedMotion = useReducedMotion();
   const pop = useSharedValue(1);
-  const previousBest = useRef(best);
+  const previousBest = useRef<number | null>(null);
 
   useEffect(() => {
-    const improved = best > previousBest.current;
+    if (!loaded) {
+      return;
+    }
+    const previous = previousBest.current;
     previousBest.current = best;
-    if (!improved || reducedMotion) {
+    if (previous === null || best <= previous || reducedMotion) {
       return;
     }
     pop.value = withSequence(
       withTiming(motion.pulseScale, { duration: motion.pulseMs }),
       withTiming(1, { duration: motion.pulseMs }),
     );
-  }, [best, reducedMotion, pop]);
+  }, [best, loaded, reducedMotion, pop]);
 
   const popStyle = useAnimatedStyle(() => ({
     transform: [{ scale: pop.value }],
   }));
 
   return (
-    <Animated.View style={[styles.popWrap, popStyle]}>
-      <Stat label="BEST" value={best} />
-    </Animated.View>
+    <View
+      accessible
+      accessibilityRole="text"
+      accessibilityLabel={`Best ${best}`}
+      accessibilityLiveRegion="polite"
+      style={styles.stat}
+    >
+      <Text style={styles.label} importantForAccessibility="no">
+        BEST
+      </Text>
+      <Animated.Text
+        style={[styles.value, popStyle]}
+        numberOfLines={1}
+        adjustsFontSizeToFit
+        importantForAccessibility="no"
+      >
+        {best}
+      </Animated.Text>
+    </View>
+  );
+}
+
+function TimeStat() {
+  const styles = useThemedStyles(makeStyles);
+  const timeLeftMs = useGameStore((state) => state.timeLeftMs);
+  const clock = formatClock(timeLeftMs);
+  const isLow = timeLeftMs <= TIME_ATTACK_WARNING_MS;
+  return (
+    <View
+      accessible
+      accessibilityRole="text"
+      accessibilityLabel={`Time left ${clock}`}
+      accessibilityLiveRegion="polite"
+      style={styles.stat}
+    >
+      <Text style={styles.label} importantForAccessibility="no">
+        TIME
+      </Text>
+      <Text
+        style={[styles.value, isLow && styles.warning]}
+        numberOfLines={1}
+        adjustsFontSizeToFit
+        importantForAccessibility="no"
+      >
+        {clock}
+      </Text>
+    </View>
   );
 }
 
 export function ScorePanel() {
   const styles = useThemedStyles(makeStyles);
-  const score = useGameStore((state) => state.score);
+  const mode = useGameStore((state) => state.mode);
   return (
     <View style={styles.row}>
-      <Stat label="SCORE" value={score}>
-        <ScoreGain />
-      </Stat>
+      <ScoreStat />
+      <Divider />
       <BestStat />
+      {mode === 'timeAttack' ? (
+        <>
+          <Divider />
+          <TimeStat />
+        </>
+      ) : null}
     </View>
   );
 }
@@ -135,49 +190,43 @@ const makeStyles = (colors: Colors) =>
     row: {
       width: '100%',
       flexDirection: 'row',
-      flexWrap: 'wrap',
-      justifyContent: 'center',
-      alignItems: 'flex-start',
-      gap: spacing.md,
-    },
-    popWrap: {
-      flexGrow: 1,
-      flexShrink: 1,
-      maxWidth: layout.scoreStatMaxWidth,
+      alignItems: 'center',
     },
     stat: {
-      backgroundColor: colors.cardNavy,
-      borderRadius: radius.md,
-      paddingVertical: spacing.sm,
-      paddingHorizontal: spacing.xl,
+      flex: 1,
       alignItems: 'center',
-      minWidth: layout.scoreStatMinWidth,
-      maxWidth: layout.scoreStatMaxWidth,
-      flexGrow: 1,
-      flexShrink: 1,
+      gap: spacing.xs / 2,
+    },
+    divider: {
+      width: 1,
+      alignSelf: 'stretch',
+      backgroundColor: colors.hairline,
     },
     label: {
-      color: colors.textInverse,
+      color: colors.textMuted,
       fontSize: font.xs,
       fontWeight: '700',
       letterSpacing: 1,
     },
     value: {
-      color: colors.textInverse,
+      color: colors.text,
       fontSize: font.lg,
       fontWeight: '800',
       maxWidth: '100%',
     },
+    warning: {
+      color: colors.danger,
+    },
     gain: {
       position: 'absolute',
-      top: spacing.xs,
-      color: colors.accent,
-      fontSize: font.md,
+      top: 0,
+      color: colors.primary,
+      fontSize: font.sm,
       fontWeight: '800',
     },
     chain: {
-      color: colors.textInverse,
-      fontSize: font.md,
+      color: colors.gold,
+      fontSize: font.sm,
       fontWeight: '800',
     },
   });
