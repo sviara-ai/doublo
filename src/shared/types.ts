@@ -12,10 +12,16 @@ export interface Tile {
   merging?: boolean;
 }
 
+export type GameMode = 'classic' | 'timeAttack' | 'zen' | 'pure';
+
 export interface MoveResult {
   tiles: Tile[];
   moved: boolean;
   scoreGained: number;
+  baseScore: number;
+  mergeCount: number;
+  multiplier: number;
+  topMergedValue: number;
 }
 
 export interface SpawnResult {

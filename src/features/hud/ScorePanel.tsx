@@ -47,6 +47,7 @@ function Stat({ label, value, children }: StatProps) {
 
 function ScoreGain() {
   const lastGain = useGameStore((state) => state.lastGain);
+  const lastMultiplier = useGameStore((state) => state.lastMultiplier);
   const gainSeq = useGameStore((state) => state.gainSeq);
   const styles = useThemedStyles(makeStyles);
   const reducedMotion = useReducedMotion();
@@ -79,6 +80,9 @@ function ScoreGain() {
       style={[styles.gain, floatStyle]}
     >
       +{lastGain}
+      {lastMultiplier > 1 ? (
+        <Text style={styles.chain}> ×{lastMultiplier}</Text>
+      ) : null}
     </Animated.Text>
   );
 }
@@ -168,6 +172,11 @@ const makeStyles = (colors: Colors) =>
       position: 'absolute',
       top: spacing.xs,
       color: colors.accent,
+      fontSize: font.md,
+      fontWeight: '800',
+    },
+    chain: {
+      color: colors.textInverse,
       fontSize: font.md,
       fontWeight: '800',
     },

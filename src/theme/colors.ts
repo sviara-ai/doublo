@@ -9,6 +9,8 @@ export interface Colors {
   primary: string;
   primaryPressed: string;
   accent: string;
+  danger: string;
+  gold: string;
   text: string;
   textMuted: string;
   textInverse: string;
@@ -28,6 +30,8 @@ export const lightColors: Colors = {
   primary: '#0060C7',
   primaryPressed: '#0852A8',
   accent: '#9CC6FF',
+  danger: '#C62828',
+  gold: '#B8860B',
   text: '#00163F',
   textMuted: '#5B6B8C',
   textInverse: '#FFFFFF',
@@ -47,6 +51,8 @@ export const darkColors: Colors = {
   primary: '#3B82E8',
   primaryPressed: '#2C66BE',
   accent: '#9CC6FF',
+  danger: '#FF6B6B',
+  gold: '#F2C14E',
   text: '#EAF1FC',
   textMuted: '#9AA8C8',
   textInverse: '#FFFFFF',

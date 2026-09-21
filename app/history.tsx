@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Button } from '@/components/ui/Button';
 import { config } from '@/config';
+import { MODE_LABELS } from '@/game/constants';
 import { formatDuration, formatPlayedAt } from '@/lib/format';
 import { goHomeOrBack } from '@/lib/navigation';
 import type { Colors } from '@/theme/colors';
@@ -105,6 +106,7 @@ export default function HistoryScreen() {
                   max {item.maxTile} · {item.moves} moves
                 </Text>
                 <Text style={styles.entryDate}>
+                  {item.mode ? `${MODE_LABELS[item.mode]} · ` : ''}
                   {formatPlayedAt(item.createdAt)} ·{' '}
                   {formatDuration(item.durationMs)}
                 </Text>

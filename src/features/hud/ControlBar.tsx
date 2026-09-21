@@ -3,6 +3,7 @@ import { clearWebFocus } from '@/lib/focus';
 import type { Colors } from '@/theme/colors';
 import { useThemedStyles } from '@/theme/useTheme';
 import { font, radius, spacing } from '@/theme/tokens';
+import { useGameStore } from '@/store/game-store';
 
 interface Props {
   canUndo: boolean;
@@ -41,9 +42,16 @@ function Chip({ label, onPress, disabled = false }: ChipProps) {
 
 export function ControlBar({ canUndo, onUndo, onSettings }: Props) {
   const styles = useThemedStyles(makeStyles);
+  const mode = useGameStore((state) => state.mode);
   return (
     <View style={styles.row}>
-      <Chip label="↶ Undo (Ad)" onPress={onUndo} disabled={!canUndo} />
+      {mode === 'pure' ? (
+        <View style={styles.badge}>
+          <Text style={styles.badgeLabel}>RANKED · NO UNDO</Text>
+        </View>
+      ) : (
+        <Chip label="↶ Undo (Ad)" onPress={onUndo} disabled={!canUndo} />
+      )}
       <Chip label="⚙ Settings" onPress={onSettings} />
     </View>
   );
@@ -80,5 +88,21 @@ const makeStyles = (colors: Colors) =>
       color: colors.text,
       fontSize: font.sm,
       fontWeight: '700',
+    },
+    badge: {
+      minHeight: 40,
+      paddingVertical: spacing.sm,
+      paddingHorizontal: spacing.lg,
+      borderRadius: radius.md,
+      borderWidth: 1,
+      borderColor: colors.primary,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    badgeLabel: {
+      color: colors.primary,
+      fontSize: font.xs,
+      fontWeight: '800',
+      letterSpacing: 0.6,
     },
   });

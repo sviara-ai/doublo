@@ -1,4 +1,5 @@
 import type { ScoreEntry } from '@/shared/schemas';
+import type { GameMode } from '@/shared/types';
 
 interface BuildScoreEntryParams {
   userId: string;
@@ -6,6 +7,7 @@ interface BuildScoreEntryParams {
   maxTile: number;
   moves: number;
   durationMs: number;
+  mode: GameMode;
 }
 
 export function buildScoreEntry(params: BuildScoreEntryParams): ScoreEntry {
@@ -17,5 +19,6 @@ export function buildScoreEntry(params: BuildScoreEntryParams): ScoreEntry {
     moves: params.moves,
     durationMs: params.durationMs,
     createdAt: Date.now(),
+    mode: params.mode,
   };
 }

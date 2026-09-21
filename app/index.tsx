@@ -1,15 +1,20 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Button } from '@/components/ui/Button';
 import { BannerAdUnit } from '@/components/ads/BannerAdUnit';
+import { ModePicker } from '@/features/modes/ModePicker';
+import { TrophyShelf } from '@/features/trophies/TrophyShelf';
+import type { GameMode } from '@/shared/types';
 import type { Colors } from '@/theme/colors';
 import { useScreenMetrics } from '@/theme/layout';
 import { useThemedStyles } from '@/theme/useTheme';
 import { font, layout, radius, spacing } from '@/theme/tokens';
+import { useGameStore } from '@/store/game-store';
 import { useSettingsStore } from '@/store/settings-store';
 import { useStatsStore } from '@/store/stats-store';
+import { useTrophyStore } from '@/store/trophy-store';
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -18,13 +23,18 @@ export default function HomeScreen() {
   const hydrate = useStatsStore((state) => state.hydrate);
   const winTarget = useSettingsStore((state) => state.winTarget);
   const hydrateSettings = useSettingsStore((state) => state.hydrate);
+  const hydrateTrophies = useTrophyStore((state) => state.hydrate);
   const styles = useThemedStyles(makeStyles);
   const metrics = useScreenMetrics();
+  const [mode, setMode] = useState<GameMode>(
+    () => useGameStore.getState().mode,
+  );
 
   useEffect(() => {
     void hydrate();
     void hydrateSettings();
-  }, [hydrate, hydrateSettings]);
+    void hydrateTrophies();
+  }, [hydrate, hydrateSettings, hydrateTrophies]);
 
   return (
     <SafeAreaView edges={['top', 'left', 'right']} style={styles.safe}>
@@ -100,8 +110,13 @@ export default function HomeScreen() {
           </View>
         </View>
 
+        <ModePicker value={mode} onChange={setMode} />
+
         <View style={styles.actions}>
-          <Button label="Play" onPress={() => router.push('/game')} />
+          <Button
+            label="Play"
+            onPress={() => router.push(`/game?mode=${mode}`)}
+          />
           <Button
             label="Scores"
             variant="ghost"
@@ -113,6 +128,8 @@ export default function HomeScreen() {
             onPress={() => router.push('/settings')}
           />
         </View>
+
+        <TrophyShelf />
       </ScrollView>
 
       {/* Banner ad anchored to the bottom of the home screen */}

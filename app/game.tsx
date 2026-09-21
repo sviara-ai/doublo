@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Platform, StyleSheet, Text, View, type ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Board } from '@/features/board/Board';
 import { DesktopMovePad } from '@/features/board/DesktopMovePad';
 import { useKeyboardMove } from '@/features/board/useKeyboardMove';
@@ -9,7 +9,11 @@ import { useSwipeGesture } from '@/features/board/useBoardGesture';
 import { ControlBar } from '@/features/hud/ControlBar';
 import { Header } from '@/features/hud/Header';
 import { ScorePanel } from '@/features/hud/ScorePanel';
+import { TimerPanel } from '@/features/hud/TimerPanel';
+import { TrophyToast } from '@/features/trophies/TrophyToast';
 import { Overlay } from '@/components/ui/Overlay';
+import { MODE_OPTIONS } from '@/game/constants';
+import type { GameMode } from '@/shared/types';
 import { useGameController } from '@/hooks/useGameController';
 import { useInterstitialAd } from '@/hooks/useInterstitialAd';
 import { goHomeOrBack } from '@/lib/navigation';
@@ -23,15 +27,29 @@ function contentJustify(isShort: boolean): ViewStyle['justifyContent'] {
   return isShort ? 'space-between' : 'space-evenly';
 }
 
+function parseMode(raw: string | string[] | undefined): GameMode | undefined {
+  const value = Array.isArray(raw) ? raw[0] : raw;
+  return MODE_OPTIONS.find((mode) => mode === value);
+}
+
 export default function GameScreen() {
   const router = useRouter();
-  const { move, newGame, undo, continueAfterWin } = useGameController();
+  const params = useLocalSearchParams<{ mode?: string }>();
+  const requestedMode = parseMode(params.mode);
+  const { move, newGame, undo, continueAfterWin } =
+    useGameController(requestedMode);
   const { showAdThenCallback } = useInterstitialAd();
   const tiles = useGameStore((state) => state.tiles);
   const status = useGameStore((state) => state.status);
   const canUndo = useGameStore(
-    (state) => state.previous !== null && state.status === 'playing',
+    (state) =>
+      state.previous !== null &&
+      state.status === 'playing' &&
+      state.mode !== 'pure',
   );
+  const mode = useGameStore((state) => state.mode);
+  const timeLeftMs = useGameStore((state) => state.timeLeftMs);
+  const ranOutOfTime = mode === 'timeAttack' && timeLeftMs === 0;
   const isPlaying = status === 'playing';
   const swipeHandlers = useSwipeGesture(move, isPlaying);
   const styles = useThemedStyles(makeStyles);
@@ -54,6 +72,7 @@ export default function GameScreen() {
     <>
       <Header onBack={() => goHomeOrBack(router)} onRestart={handleNewGame} />
       <ScorePanel />
+      <TimerPanel />
       <ControlBar
         canUndo={canUndo}
         onUndo={() => {
@@ -74,8 +93,12 @@ export default function GameScreen() {
     <Board tiles={tiles} onMove={move}>
       {showOverlay && status === 'over' ? (
         <Overlay
-          title="Game Over"
-          message="No moves left on this board."
+          title={ranOutOfTime ? "Time's up!" : 'Game Over'}
+          message={
+            ranOutOfTime
+              ? 'Three minutes done. Go again?'
+              : 'No moves left on this board.'
+          }
           actionLabel="New Game"
           onAction={handleNewGame}
           onClose={closeOverlay}
@@ -116,6 +139,7 @@ export default function GameScreen() {
             },
           ]}
         >
+          <TrophyToast />
           {metrics.isLandscape ? (
             <>
               {board}

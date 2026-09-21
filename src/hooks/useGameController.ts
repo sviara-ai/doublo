@@ -1,11 +1,16 @@
 import { useCallback, useEffect, useRef } from 'react';
-import { transientClearMs } from '@/game/constants';
+import {
+  TIME_ATTACK_MS,
+  TIME_ATTACK_TICK_MS,
+  transientClearMs,
+} from '@/game/constants';
 import {
   applyMove,
   canMove,
   clearTransientFlags,
   hasWon,
   maxTileValue,
+  relieveBoard,
   spawnTile,
 } from '@/game/engine';
 import { persistGame, resumeOrStart, startNewGame } from '@/game/session';
@@ -18,10 +23,12 @@ import { buildScoreEntry } from '@/services/score-service';
 import { useGameStore } from '@/store/game-store';
 import { useSettingsStore } from '@/store/settings-store';
 import { useStatsStore } from '@/store/stats-store';
-import type { Direction, Tile } from '@/shared/types';
+import { useTrophyStore } from '@/store/trophy-store';
+import type { Direction, GameMode, Tile } from '@/shared/types';
 
-export function useGameController() {
+export function useGameController(requestedMode?: GameMode) {
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const mode = useGameStore((state) => state.mode);
 
   const clearPendingCleanup = useCallback(() => {
     if (timer.current) {
@@ -39,8 +46,9 @@ export function useGameController() {
     preloadSound();
     await useSettingsStore.getState().hydrate();
     void useStatsStore.getState().hydrate();
-    await resumeOrStart();
-  }, []);
+    void useTrophyStore.getState().hydrate();
+    await resumeOrStart(requestedMode);
+  }, [requestedMode]);
 
   useEffect(() => {
     void bootstrap();
@@ -60,12 +68,40 @@ export function useGameController() {
         maxTile: maxTileValue(tiles),
         moves,
         durationMs: Date.now() - startedAt,
+        mode: useGameStore.getState().mode,
       });
       await useStatsStore.getState().recordGame(entry);
       await clearSavedGame();
     },
     [],
   );
+
+  useEffect(() => {
+    if (mode !== 'timeAttack') {
+      return undefined;
+    }
+    const interval = setInterval(() => {
+      const state = useGameStore.getState();
+      if (state.status !== 'playing') {
+        return;
+      }
+      const remaining = Math.max(
+        0,
+        TIME_ATTACK_MS - (Date.now() - state.startedAt),
+      );
+      state.set({ timeLeftMs: remaining });
+      if (remaining === 0) {
+        state.set({ status: 'over' });
+        void finalizeGame(
+          state.tiles,
+          state.score,
+          state.moves,
+          state.startedAt,
+        );
+      }
+    }, TIME_ATTACK_TICK_MS);
+    return () => clearInterval(interval);
+  }, [mode, finalizeGame]);
 
   const move = useCallback(
     (direction: Direction) => {
@@ -86,14 +122,17 @@ export function useGameController() {
       }
 
       const spawned = spawnTile(result.tiles, gridSize, state.nextTileId);
-      const tiles = spawned.tile
+      const spawnedTiles = spawned.tile
         ? [...result.tiles, spawned.tile]
         : result.tiles;
+      const isZen = state.mode === 'zen';
+      const blocked = !canMove(spawnedTiles, gridSize);
+      const tiles =
+        isZen && blocked ? relieveBoard(spawnedTiles, gridSize) : spawnedTiles;
       const score = state.score + result.scoreGained;
       const moves = state.moves + 1;
       const won = !state.keepPlaying && hasWon(tiles, winTarget);
-      const blocked = !canMove(tiles, gridSize);
-      const status = won ? 'won' : blocked ? 'over' : 'playing';
+      const status = won ? 'won' : blocked && !isZen ? 'over' : 'playing';
 
       useGameStore.getState().set({
         tiles,
@@ -102,6 +141,7 @@ export function useGameController() {
         moves,
         status,
         lastGain: result.scoreGained,
+        lastMultiplier: result.multiplier,
         gainSeq: state.gainSeq + 1,
         previous: {
           tiles: clearTransientFlags(state.tiles),
@@ -113,11 +153,12 @@ export function useGameController() {
       });
 
       if (settings.hapticsEnabled) {
-        playMoveHaptic(result.scoreGained > 0);
+        playMoveHaptic(result.mergeCount > 0);
       }
-      if (result.scoreGained > 0 && settings.soundEnabled) {
-        playScoreSound();
+      if (result.mergeCount > 0 && settings.soundEnabled) {
+        playScoreSound(result.topMergedValue, result.mergeCount);
       }
+      useTrophyStore.getState().award(maxTileValue(tiles));
 
       if (status === 'over') {
         void finalizeGame(tiles, score, moves, state.startedAt);
@@ -136,7 +177,8 @@ export function useGameController() {
   );
 
   const undo = useCallback(async () => {
-    if (!useGameStore.getState().previous) {
+    const initial = useGameStore.getState();
+    if (!initial.previous || initial.mode === 'pure') {
       return;
     }
     const granted = await getAdService().showRewardedAd();
@@ -158,6 +200,7 @@ export function useGameController() {
       keepPlaying: snapshot.keepPlaying,
       previous: null,
       lastGain: 0,
+      lastMultiplier: 1,
     });
     void persistGame();
   }, [clearPendingCleanup]);
@@ -165,7 +208,7 @@ export function useGameController() {
   const continueAfterWin = useCallback(() => {
     clearPendingCleanup();
     const state = useGameStore.getState();
-    if (!canMove(state.tiles, state.gridSize)) {
+    if (state.mode !== 'zen' && !canMove(state.tiles, state.gridSize)) {
       state.set({ keepPlaying: true, status: 'over' });
       void finalizeGame(state.tiles, state.score, state.moves, state.startedAt);
       return;

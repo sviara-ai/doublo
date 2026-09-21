@@ -1,5 +1,8 @@
 import { loadScoreBoard } from '@/data/score-repository';
 import type { ScoreEntry } from '@/shared/schemas';
+import type { GameMode } from '@/shared/types';
+
+export const RANKED_MODE: GameMode = 'pure';
 
 export interface LeaderboardEntry {
   userId: string;
@@ -18,7 +21,7 @@ const localLeaderboardService: LeaderboardService = {
   top: async (limit) => {
     const board = await loadScoreBoard();
     return board.history
-      .slice()
+      .filter((entry) => entry.mode === RANKED_MODE)
       .sort((a, b) => b.score - a.score)
       .slice(0, limit)
       .map((entry) => ({

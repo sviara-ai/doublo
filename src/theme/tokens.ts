@@ -35,6 +35,8 @@ export const layout = {
   minTouchTarget: 48,
   optionMinHeight: 44,
   optionMinWidth: 64,
+  trophyBadgeMinWidth: 54,
+  modeCardMinWidth: 150,
   landscapeColumnGap: 28,
   landscapeSidebarWidth: 240,
 };

@@ -1,4 +1,5 @@
 import {
+  chainMultiplier,
   FIRST_TILE_ID,
   SPAWN_BONUS_TILE_VALUE,
   SPAWN_FOUR_PROBABILITY,
@@ -116,7 +117,9 @@ export function applyMove(
   const survivors: Tile[] = [];
   const merging: Tile[] = [];
   let moved = false;
-  let scoreGained = 0;
+  let baseScore = 0;
+  let mergeCount = 0;
+  let topMergedValue = 0;
 
   for (const line of lineCells(direction, size)) {
     const present = line
@@ -136,7 +139,11 @@ export function applyMove(
         last.merged = true;
         last.value = tile.value * 2;
         last.absorbed = tile;
-        scoreGained += last.value;
+        baseScore += last.value;
+        mergeCount += 1;
+        if (last.value > topMergedValue) {
+          topMergedValue = last.value;
+        }
       } else {
         placed.push({ tile, merged: false, value: tile.value });
       }
@@ -170,9 +177,26 @@ export function applyMove(
   }
 
   if (!moved) {
-    return { tiles: input, moved: false, scoreGained: 0 };
+    return {
+      tiles: input,
+      moved: false,
+      scoreGained: 0,
+      baseScore: 0,
+      mergeCount: 0,
+      multiplier: 1,
+      topMergedValue: 0,
+    };
   }
-  return { tiles: [...merging, ...survivors], moved: true, scoreGained };
+  const multiplier = chainMultiplier(mergeCount);
+  return {
+    tiles: [...merging, ...survivors],
+    moved: true,
+    scoreGained: Math.round(baseScore * multiplier),
+    baseScore,
+    mergeCount,
+    multiplier,
+    topMergedValue,
+  };
 }
 
 export function maxTileValue(tiles: Tile[]): number {
@@ -209,6 +233,22 @@ export function canMove(tiles: Tile[], size: number): boolean {
     }
   }
   return false;
+}
+
+export function relieveBoard(tiles: Tile[], size: number): Tile[] {
+  let current = logicalTiles(tiles);
+  while (current.length > 0 && !canMove(current, size)) {
+    const lowest = current.reduce(
+      (min, tile) => (tile.value < min ? tile.value : min),
+      current[0].value,
+    );
+    const survivors = current.filter((tile) => tile.value !== lowest);
+    if (survivors.length === current.length) {
+      return current;
+    }
+    current = survivors;
+  }
+  return current;
 }
 
 export function clearTransientFlags(tiles: Tile[]): Tile[] {

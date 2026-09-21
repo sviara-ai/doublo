@@ -19,6 +19,8 @@ export const GameSettingsSchema = z.object({
   hapticsEnabled: z.boolean(),
 });
 
+export const GameModeSchema = z.enum(['classic', 'timeAttack', 'zen', 'pure']);
+
 export const SavedGameSchema = z.object({
   tiles: z.array(TileSchema),
   score: z.number(),
@@ -29,6 +31,7 @@ export const SavedGameSchema = z.object({
   nextTileId: z.number(),
   gridSize: z.number(),
   winTarget: z.number(),
+  mode: GameModeSchema,
 });
 
 export const ScoreEntrySchema = z.object({
@@ -39,6 +42,11 @@ export const ScoreEntrySchema = z.object({
   moves: z.number(),
   durationMs: z.number(),
   createdAt: z.number(),
+  mode: GameModeSchema.optional(),
+});
+
+export const TrophyBookSchema = z.object({
+  earned: z.array(z.number()),
 });
 
 export const ScoreBoardSchema = z.object({
@@ -51,3 +59,4 @@ export type GameSettings = z.infer<typeof GameSettingsSchema>;
 export type SavedGame = z.infer<typeof SavedGameSchema>;
 export type ScoreEntry = z.infer<typeof ScoreEntrySchema>;
 export type ScoreBoard = z.infer<typeof ScoreBoardSchema>;
+export type TrophyBook = z.infer<typeof TrophyBookSchema>;
