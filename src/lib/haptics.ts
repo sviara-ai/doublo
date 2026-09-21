@@ -11,3 +11,10 @@ export function playMoveHaptic(merged: boolean): void {
       : Haptics.ImpactFeedbackStyle.Light,
   );
 }
+
+export function playBlockedHaptic(): void {
+  if (Platform.OS === 'web') {
+    return;
+  }
+  void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+}

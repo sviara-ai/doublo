@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { DEFAULT_SETTINGS } from '@/game/constants';
+import { DEFAULT_SETTINGS, FIRST_TILE_ID } from '@/game/constants';
 import type { GameStatus, Tile } from '@/shared/types';
 
 export interface GameSnapshot {
@@ -20,7 +20,11 @@ interface GameState {
   hydrated: boolean;
   gridSize: number;
   winTarget: number;
+  nextTileId: number;
   previous: GameSnapshot | null;
+  lastGain: number;
+  gainSeq: number;
+  blockedSeq: number;
   set: (partial: Partial<GameState>) => void;
 }
 
@@ -34,6 +38,10 @@ export const useGameStore = create<GameState>()((set) => ({
   hydrated: false,
   gridSize: DEFAULT_SETTINGS.gridSize,
   winTarget: DEFAULT_SETTINGS.winTarget,
+  nextTileId: FIRST_TILE_ID,
   previous: null,
+  lastGain: 0,
+  gainSeq: 0,
+  blockedSeq: 0,
   set: (partial) => set(partial),
 }));

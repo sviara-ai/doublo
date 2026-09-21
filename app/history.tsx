@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Button } from '@/components/ui/Button';
 import { config } from '@/config';
+import { formatDuration, formatPlayedAt } from '@/lib/format';
 import { goHomeOrBack } from '@/lib/navigation';
 import type { Colors } from '@/theme/colors';
 import { useScreenMetrics } from '@/theme/layout';
@@ -19,9 +20,18 @@ interface SummaryProps {
 function Summary({ label, value }: SummaryProps) {
   const styles = useThemedStyles(makeStyles);
   return (
-    <View style={styles.summaryItem}>
-      <Text style={styles.summaryValue}>{value}</Text>
-      <Text style={styles.summaryLabel}>{label}</Text>
+    <View
+      accessible
+      accessibilityRole="text"
+      accessibilityLabel={`${label} ${value}`}
+      style={styles.summaryItem}
+    >
+      <Text style={styles.summaryValue} importantForAccessibility="no">
+        {value}
+      </Text>
+      <Text style={styles.summaryLabel} importantForAccessibility="no">
+        {label}
+      </Text>
     </View>
   );
 }
@@ -52,6 +62,7 @@ export default function HistoryScreen() {
         ]}
       >
         <Text
+          accessibilityRole="header"
           style={[styles.title, metrics.isNarrow && styles.titleCompact]}
           numberOfLines={1}
           adjustsFontSizeToFit
@@ -75,17 +86,29 @@ export default function HistoryScreen() {
             <Text style={styles.empty}>No games yet. Play your first round!</Text>
           }
           renderItem={({ item }) => (
-            <View style={styles.entry}>
+            <View
+              accessible
+              accessibilityRole="text"
+              accessibilityLabel={`${item.score} points, highest tile ${item.maxTile}, ${item.moves} moves, played ${formatPlayedAt(item.createdAt)}`}
+              style={styles.entry}
+            >
               <Text
                 style={styles.entryScore}
                 numberOfLines={1}
                 adjustsFontSizeToFit
+                importantForAccessibility="no"
               >
                 {item.score}
               </Text>
-              <Text style={styles.entryMeta}>
-                max {item.maxTile} · {item.moves} moves
-              </Text>
+              <View style={styles.entryDetail} importantForAccessibility="no">
+                <Text style={styles.entryMeta}>
+                  max {item.maxTile} · {item.moves} moves
+                </Text>
+                <Text style={styles.entryDate}>
+                  {formatPlayedAt(item.createdAt)} ·{' '}
+                  {formatDuration(item.durationMs)}
+                </Text>
+              </View>
             </View>
           )}
         />
@@ -184,10 +207,19 @@ const makeStyles = (colors: Colors) =>
       flexShrink: 1,
       minWidth: 72,
     },
+    entryDetail: {
+      flexShrink: 1,
+      alignItems: 'flex-end',
+      gap: spacing.xs,
+    },
     entryMeta: {
       fontSize: font.sm,
       color: colors.textMuted,
-      flexShrink: 1,
+      textAlign: 'right',
+    },
+    entryDate: {
+      fontSize: font.xs,
+      color: colors.textMuted,
       textAlign: 'right',
     },
   });

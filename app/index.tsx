@@ -39,10 +39,18 @@ export default function HomeScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.hero}>
-          <View style={styles.logo}>
-            <Text style={styles.logoText}>{winTarget}</Text>
+          <View
+            accessible
+            accessibilityRole="text"
+            accessibilityLabel={`Win target ${winTarget}`}
+            style={styles.logo}
+          >
+            <Text style={styles.logoText} importantForAccessibility="no">
+              {winTarget}
+            </Text>
           </View>
           <Text
+            accessibilityRole="header"
             style={[styles.title, metrics.isNarrow && styles.titleCompact]}
             numberOfLines={1}
             adjustsFontSizeToFit
@@ -53,15 +61,39 @@ export default function HomeScreen() {
         </View>
 
         <View style={styles.stats}>
-          <View style={styles.statCard}>
-            <Text style={styles.statLabel}>BEST</Text>
-            <Text style={styles.statValue} numberOfLines={1} adjustsFontSizeToFit>
+          <View
+            accessible
+            accessibilityRole="text"
+            accessibilityLabel={`Best score ${best}`}
+            style={styles.statCard}
+          >
+            <Text style={styles.statLabel} importantForAccessibility="no">
+              BEST
+            </Text>
+            <Text
+              style={styles.statValue}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              importantForAccessibility="no"
+            >
               {best}
             </Text>
           </View>
-          <View style={styles.statCard}>
-            <Text style={styles.statLabel}>GAMES</Text>
-            <Text style={styles.statValue} numberOfLines={1} adjustsFontSizeToFit>
+          <View
+            accessible
+            accessibilityRole="text"
+            accessibilityLabel={`Games played ${gamesPlayed}`}
+            style={styles.statCard}
+          >
+            <Text style={styles.statLabel} importantForAccessibility="no">
+              GAMES
+            </Text>
+            <Text
+              style={styles.statValue}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              importantForAccessibility="no"
+            >
               {gamesPlayed}
             </Text>
           </View>

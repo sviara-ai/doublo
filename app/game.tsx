@@ -16,7 +16,7 @@ import { useGameStore } from '@/store/game-store';
 import type { Colors } from '@/theme/colors';
 import { useScreenMetrics } from '@/theme/layout';
 import { useThemedStyles } from '@/theme/useTheme';
-import { font, spacing } from '@/theme/tokens';
+import { font, layout, spacing } from '@/theme/tokens';
 
 function contentJustify(isShort: boolean): ViewStyle['justifyContent'] {
   return isShort ? 'space-between' : 'space-evenly';
@@ -34,8 +34,9 @@ export default function GameScreen() {
   const swipeHandlers = useSwipeGesture(move, isPlaying);
   const styles = useThemedStyles(makeStyles);
   const metrics = useScreenMetrics();
-  const showDesktopControls = Platform.OS === 'web' && metrics.isWide;
-  useKeyboardMove(move, isPlaying && showDesktopControls);
+  const isWeb = Platform.OS === 'web';
+  const showDesktopControls = isWeb && (metrics.isWide || metrics.isLandscape);
+  useKeyboardMove(move, isPlaying && isWeb);
 
   const [overlayDismissed, setOverlayDismissed] = useState(false);
   useEffect(() => {
@@ -46,6 +47,53 @@ export default function GameScreen() {
   const closeOverlay = () => setOverlayDismissed(true);
   const showOverlay = !isPlaying && !overlayDismissed;
 
+  const hud = (
+    <>
+      <Header onBack={() => goHomeOrBack(router)} onRestart={newGame} />
+      <ScorePanel />
+      <ControlBar
+        canUndo={canUndo}
+        onUndo={() => {
+          void undo();
+        }}
+        onSettings={() => router.push('/settings')}
+      />
+    </>
+  );
+
+  const footer = showDesktopControls ? (
+    <DesktopMovePad onMove={move} enabled={isPlaying} />
+  ) : (
+    <Text style={styles.hint}>Swipe anywhere to move the tiles.</Text>
+  );
+
+  const board = (
+    <Board tiles={tiles} onMove={move}>
+      {showOverlay && status === 'over' ? (
+        <Overlay
+          title="Game Over"
+          message="No moves left on this board."
+          actionLabel="New Game"
+          onAction={newGame}
+          onClose={closeOverlay}
+          closeLabel="Dismiss and review the final board"
+        />
+      ) : null}
+      {showOverlay && status === 'won' ? (
+        <Overlay
+          title="You win!"
+          message="Keep going to chase a higher score."
+          actionLabel="Keep Going"
+          onAction={continueAfterWin}
+          secondaryLabel="New Game"
+          onSecondary={newGame}
+          onClose={continueAfterWin}
+          closeLabel="Dismiss and keep playing"
+        />
+      ) : null}
+    </Board>
+  );
+
   return (
     <SafeAreaView edges={['top', 'left', 'right']} style={styles.safe}>
       <View style={styles.container}>
@@ -54,47 +102,31 @@ export default function GameScreen() {
           {...swipeHandlers}
           style={[
             styles.content,
+            metrics.isLandscape && styles.contentLandscape,
             {
               maxWidth: metrics.contentMaxWidth,
               paddingHorizontal: metrics.horizontalPadding + spacing.xs,
               paddingVertical: metrics.isShort ? spacing.sm : spacing.xl,
-              justifyContent: contentJustify(metrics.isShort),
+              justifyContent: metrics.isLandscape
+                ? 'center'
+                : contentJustify(metrics.isShort),
             },
           ]}
         >
-          <Header onBack={() => goHomeOrBack(router)} onRestart={newGame} />
-          <ScorePanel />
-          <ControlBar
-            canUndo={canUndo}
-            onUndo={() => {
-              void undo();
-            }}
-            onSettings={() => router.push('/settings')}
-          />
-          <Board tiles={tiles}>
-            {showOverlay && status === 'over' ? (
-              <Overlay
-                title="Game Over"
-                actionLabel="New Game"
-                onAction={newGame}
-                onClose={closeOverlay}
-              />
-            ) : null}
-            {showOverlay && status === 'won' ? (
-              <Overlay
-                title="You win!"
-                actionLabel="Keep Going"
-                onAction={continueAfterWin}
-                secondaryLabel="New Game"
-                onSecondary={newGame}
-                onClose={closeOverlay}
-              />
-            ) : null}
-          </Board>
-          {showDesktopControls ? (
-            <DesktopMovePad onMove={move} enabled={isPlaying} />
+          {metrics.isLandscape ? (
+            <>
+              {board}
+              <View style={styles.sidebar}>
+                {hud}
+                {footer}
+              </View>
+            </>
           ) : (
-            <Text style={styles.hint}>Swipe anywhere to move the tiles.</Text>
+            <>
+              {hud}
+              {board}
+              {footer}
+            </>
           )}
         </View>
       </View>
@@ -122,6 +154,18 @@ const makeStyles = (colors: Colors) =>
       paddingVertical: spacing.xl,
       gap: spacing.sm,
       userSelect: 'none',
+    },
+    contentLandscape: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: layout.landscapeColumnGap,
+    },
+    sidebar: {
+      flexShrink: 1,
+      maxWidth: layout.landscapeSidebarWidth,
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: spacing.md,
     },
     hint: {
       fontSize: font.sm,

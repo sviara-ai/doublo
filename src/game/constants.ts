@@ -3,6 +3,9 @@ import type { GameSettings } from '@/shared/schemas';
 export const SPAWN_TILE_VALUE = 2;
 export const SPAWN_BONUS_TILE_VALUE = 4;
 export const SPAWN_FOUR_PROBABILITY = 0.1;
+export const FIRST_TILE_ID = 1;
+
+export const BEST_SCORE_FLUSH_MS = 1200;
 
 export const GRID_SIZE_OPTIONS = [3, 4, 5, 6] as const;
 export const START_TILE_OPTIONS = [1, 2, 3] as const;
@@ -15,7 +18,14 @@ export const DEFAULT_SETTINGS: GameSettings = {
   winTarget: 2048,
   animationSpeed: 'normal',
   soundEnabled: true,
+  hapticsEnabled: true,
 };
+
+export const STRUCTURAL_SETTING_KEYS = [
+  'gridSize',
+  'startTiles',
+  'winTarget',
+] as const;
 
 export const MOVE_DURATION_BY_SPEED: Record<
   GameSettings['animationSpeed'],

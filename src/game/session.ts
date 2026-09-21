@@ -1,9 +1,4 @@
-import {
-  clearTransientFlags,
-  createInitialTiles,
-  getNextId,
-  setNextId,
-} from './engine';
+import { clearTransientFlags, createInitialTiles } from './engine';
 import {
   clearSavedGame,
   loadSavedGame,
@@ -14,9 +9,10 @@ import { useSettingsStore } from '@/store/settings-store';
 
 export function startNewGame(): void {
   const { gridSize, startTiles, winTarget } = useSettingsStore.getState();
-  const tiles = createInitialTiles(gridSize, startTiles);
+  const initial = createInitialTiles(gridSize, startTiles);
   useGameStore.getState().set({
-    tiles,
+    tiles: initial.tiles,
+    nextTileId: initial.nextTileId,
     score: 0,
     moves: 0,
     startedAt: Date.now(),
@@ -26,6 +22,7 @@ export function startNewGame(): void {
     gridSize,
     winTarget,
     previous: null,
+    lastGain: 0,
   });
   void persistGame();
 }
@@ -43,7 +40,7 @@ export async function persistGame(): Promise<void> {
     startedAt: state.startedAt,
     status: state.status === 'won' ? 'won' : 'playing',
     keepPlaying: state.keepPlaying,
-    nextTileId: getNextId(),
+    nextTileId: state.nextTileId,
     gridSize: state.gridSize,
     winTarget: state.winTarget,
   });
@@ -56,9 +53,9 @@ export async function resumeOrStart(): Promise<void> {
   const { gridSize, winTarget } = useSettingsStore.getState();
   const saved = await loadSavedGame();
   if (saved && saved.gridSize === gridSize && saved.winTarget === winTarget) {
-    setNextId(saved.nextTileId);
     useGameStore.getState().set({
       tiles: saved.tiles,
+      nextTileId: saved.nextTileId,
       score: saved.score,
       moves: saved.moves,
       startedAt: saved.startedAt,
@@ -68,6 +65,7 @@ export async function resumeOrStart(): Promise<void> {
       gridSize: saved.gridSize,
       winTarget: saved.winTarget,
       previous: null,
+      lastGain: 0,
     });
   } else {
     startNewGame();

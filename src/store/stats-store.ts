@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { BEST_SCORE_FLUSH_MS } from '@/game/constants';
 import {
   appendEntry,
   loadScoreBoard,
@@ -12,8 +13,17 @@ interface StatsState {
   history: ScoreEntry[];
   loaded: boolean;
   hydrate: () => Promise<void>;
-  updateBest: (score: number) => Promise<void>;
+  updateBest: (score: number) => void;
   recordGame: (entry: ScoreEntry) => Promise<void>;
+}
+
+let flushTimer: ReturnType<typeof setTimeout> | null = null;
+
+function cancelPendingFlush(): void {
+  if (flushTimer) {
+    clearTimeout(flushTimer);
+    flushTimer = null;
+  }
 }
 
 export const useStatsStore = create<StatsState>()((set, get) => ({
@@ -33,21 +43,29 @@ export const useStatsStore = create<StatsState>()((set, get) => ({
       loaded: true,
     });
   },
-  updateBest: async (score) => {
+  updateBest: (score) => {
     if (score <= get().best) {
       return;
     }
-    const board = {
-      best: score,
-      gamesPlayed: get().gamesPlayed,
-      history: get().history,
-    };
-    await saveScoreBoard(board);
     set({ best: score });
+    cancelPendingFlush();
+    flushTimer = setTimeout(() => {
+      flushTimer = null;
+      void saveScoreBoard({
+        best: get().best,
+        gamesPlayed: get().gamesPlayed,
+        history: get().history,
+      });
+    }, BEST_SCORE_FLUSH_MS);
   },
   recordGame: async (entry) => {
+    cancelPendingFlush();
     const board = appendEntry(
-      { best: get().best, gamesPlayed: get().gamesPlayed, history: get().history },
+      {
+        best: get().best,
+        gamesPlayed: get().gamesPlayed,
+        history: get().history,
+      },
       entry,
     );
     await saveScoreBoard(board);

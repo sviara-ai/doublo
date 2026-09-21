@@ -17,3 +17,13 @@ export interface MoveResult {
   moved: boolean;
   scoreGained: number;
 }
+
+export interface SpawnResult {
+  tile: Tile | null;
+  nextTileId: number;
+}
+
+export interface InitialTilesResult {
+  tiles: Tile[];
+  nextTileId: number;
+}

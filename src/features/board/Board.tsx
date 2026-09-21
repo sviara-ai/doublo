@@ -1,25 +1,53 @@
-import { type ReactNode, useMemo } from 'react';
+import { type ReactNode, useEffect, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
+import Animated, {
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withSequence,
+  withTiming,
+} from 'react-native-reanimated';
 import { MOVE_DURATION_BY_SPEED } from '@/game/constants';
 import type { Colors } from '@/theme/colors';
 import { useBoardMetrics } from '@/theme/layout';
 import { useThemedStyles } from '@/theme/useTheme';
+import { motion } from '@/theme/tokens';
 import { useGameStore } from '@/store/game-store';
 import { useSettingsStore } from '@/store/settings-store';
+import { describeBoard, MOVE_ACTIONS } from './board-a11y';
 import { Tile } from './Tile';
-import type { Tile as TileModel } from '@/shared/types';
+import type { Direction, Tile as TileModel } from '@/shared/types';
 
 interface Props {
   tiles: TileModel[];
+  onMove: (direction: Direction) => void;
   children?: ReactNode;
 }
 
-export function Board({ tiles, children }: Props) {
+export function Board({ tiles, onMove, children }: Props) {
   const gridSize = useGameStore((state) => state.gridSize);
+  const blockedSeq = useGameStore((state) => state.blockedSeq);
   const animationSpeed = useSettingsStore((state) => state.animationSpeed);
   const metrics = useBoardMetrics(gridSize);
   const styles = useThemedStyles(makeStyles);
-  const duration = MOVE_DURATION_BY_SPEED[animationSpeed];
+  const reducedMotion = useReducedMotion();
+  const duration = reducedMotion ? 0 : MOVE_DURATION_BY_SPEED[animationSpeed];
+  const shake = useSharedValue(0);
+
+  useEffect(() => {
+    if (blockedSeq === 0 || reducedMotion) {
+      return;
+    }
+    shake.value = withSequence(
+      withTiming(-motion.shakeOffset, { duration: motion.shakeMs }),
+      withTiming(motion.shakeOffset, { duration: motion.shakeMs }),
+      withTiming(0, { duration: motion.shakeMs }),
+    );
+  }, [blockedSeq, reducedMotion, shake]);
+
+  const shakeStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: shake.value }],
+  }));
 
   const cells = useMemo(
     () =>
@@ -31,9 +59,17 @@ export function Board({ tiles, children }: Props) {
   );
 
   return (
-    <View
+    <Animated.View
+      accessible
+      accessibilityLabel={describeBoard(tiles, gridSize)}
+      accessibilityHint="Use the move actions, or swipe, to slide every tile."
+      accessibilityActions={MOVE_ACTIONS}
+      onAccessibilityAction={(event) => {
+        onMove(event.nativeEvent.actionName as Direction);
+      }}
       style={[
         styles.board,
+        shakeStyle,
         {
           width: metrics.boardSize,
           height: metrics.boardSize,
@@ -49,7 +85,7 @@ export function Board({ tiles, children }: Props) {
             {
               width: metrics.cellSize,
               height: metrics.cellSize,
-              borderRadius: metrics.cellSize * 0.12,
+              borderRadius: metrics.cellRadius,
               left: metrics.position(cell.col),
               top: metrics.position(cell.row),
             },
@@ -63,12 +99,13 @@ export function Board({ tiles, children }: Props) {
           x={metrics.position(tile.col)}
           y={metrics.position(tile.row)}
           size={metrics.cellSize}
+          cornerRadius={metrics.cellRadius}
           fontSize={metrics.fontSize(tile.value)}
           duration={duration}
         />
       ))}
       {children ? <View style={styles.overlay}>{children}</View> : null}
-    </View>
+    </Animated.View>
   );
 }
 

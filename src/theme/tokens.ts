@@ -27,9 +27,25 @@ export const font = {
 export const layout = {
   maxContentWidth: 520,
   maxWideContentWidth: 760,
+  maxProseWidth: 360,
   maxButtonWidth: 260,
   summaryMinWidth: 128,
   scoreStatMinWidth: 104,
   scoreStatMaxWidth: 180,
   minTouchTarget: 48,
+  optionMinHeight: 44,
+  optionMinWidth: 64,
+  landscapeColumnGap: 28,
+  landscapeSidebarWidth: 240,
+};
+
+export const motion = {
+  popMs: 70,
+  popScale: 1.12,
+  floatMs: 720,
+  floatRise: 34,
+  shakeMs: 55,
+  shakeOffset: 9,
+  pulseMs: 190,
+  pulseScale: 1.18,
 };

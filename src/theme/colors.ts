@@ -8,6 +8,7 @@ export interface Colors {
   boardCell: string;
   primary: string;
   primaryPressed: string;
+  accent: string;
   text: string;
   textMuted: string;
   textInverse: string;
@@ -26,6 +27,7 @@ export const lightColors: Colors = {
   boardCell: '#E4EDFB',
   primary: '#0060C7',
   primaryPressed: '#0852A8',
+  accent: '#9CC6FF',
   text: '#00163F',
   textMuted: '#5B6B8C',
   textInverse: '#FFFFFF',
@@ -44,6 +46,7 @@ export const darkColors: Colors = {
   boardCell: '#243352',
   primary: '#3B82E8',
   primaryPressed: '#2C66BE',
+  accent: '#9CC6FF',
   text: '#EAF1FC',
   textMuted: '#9AA8C8',
   textInverse: '#FFFFFF',

@@ -2,33 +2,42 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { clearWebFocus } from '@/lib/focus';
 import type { Colors } from '@/theme/colors';
 import { useThemedStyles } from '@/theme/useTheme';
-import { font, radius, spacing } from '@/theme/tokens';
+import { font, layout, radius, spacing } from '@/theme/tokens';
 import { Button } from './Button';
 
 interface Props {
   title: string;
+  message?: string;
   actionLabel: string;
   onAction: () => void;
   secondaryLabel?: string;
   onSecondary?: () => void;
   onClose?: () => void;
+  closeLabel?: string;
 }
 
 export function Overlay({
   title,
+  message,
   actionLabel,
   onAction,
   secondaryLabel,
   onSecondary,
   onClose,
+  closeLabel = 'Close',
 }: Props) {
   const styles = useThemedStyles(makeStyles);
   return (
-    <View style={styles.overlay}>
+    <View
+      accessibilityViewIsModal
+      accessibilityRole="alert"
+      accessibilityLabel={message ? `${title}. ${message}` : title}
+      style={styles.overlay}
+    >
       {onClose ? (
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Close"
+          accessibilityLabel={closeLabel}
           hitSlop={12}
           onPress={() => {
             clearWebFocus();
@@ -40,6 +49,7 @@ export function Overlay({
         </Pressable>
       ) : null}
       <Text style={styles.title}>{title}</Text>
+      {message ? <Text style={styles.message}>{message}</Text> : null}
       <Button label={actionLabel} onPress={onAction} />
       {secondaryLabel && onSecondary ? (
         <Button label={secondaryLabel} variant="ghost" onPress={onSecondary} />
@@ -86,5 +96,12 @@ const makeStyles = (colors: Colors) =>
       color: colors.text,
       marginBottom: spacing.sm,
       textAlign: 'center',
+    },
+    message: {
+      fontSize: font.md,
+      color: colors.textMuted,
+      textAlign: 'center',
+      maxWidth: layout.maxProseWidth,
+      marginBottom: spacing.sm,
     },
   });

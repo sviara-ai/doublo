@@ -4,6 +4,7 @@ import { Platform, StyleSheet, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { Branding } from '@/components/ui/Branding';
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import { useColors } from '@/theme/useTheme';
 
 export default function RootLayout() {
@@ -13,13 +14,15 @@ export default function RootLayout() {
       <StatusBar style="auto" />
       <View style={[styles.root, { backgroundColor: colors.background }]}>
         <View style={styles.stack}>
-          <Stack
-            screenOptions={{
-              headerShown: false,
-              contentStyle: { backgroundColor: colors.background },
-              animation: 'fade',
-            }}
-          />
+          <ErrorBoundary>
+            <Stack
+              screenOptions={{
+                headerShown: false,
+                contentStyle: { backgroundColor: colors.background },
+                animation: 'fade',
+              }}
+            />
+          </ErrorBoundary>
         </View>
         <SafeAreaView
           edges={['bottom']}

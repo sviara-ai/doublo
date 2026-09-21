@@ -4,15 +4,13 @@ import {
   applyMove,
   canMove,
   clearTransientFlags,
-  getNextId,
   hasWon,
   maxTileValue,
-  setNextId,
   spawnTile,
 } from '@/game/engine';
 import { persistGame, resumeOrStart, startNewGame } from '@/game/session';
 import { clearSavedGame } from '@/data/game-repository';
-import { playMoveHaptic } from '@/lib/haptics';
+import { playBlockedHaptic, playMoveHaptic } from '@/lib/haptics';
 import { playScoreSound, preloadSound } from '@/lib/sound';
 import { getAdService } from '@/services/ad-service';
 import { getDeviceId } from '@/services/auth-service';
@@ -76,13 +74,21 @@ export function useGameController() {
         return;
       }
       const { gridSize, winTarget } = state;
-      const snapshotNextId = getNextId();
+      const settings = useSettingsStore.getState();
       const result = applyMove(state.tiles, direction, gridSize);
+
       if (!result.moved) {
+        state.set({ blockedSeq: state.blockedSeq + 1 });
+        if (settings.hapticsEnabled) {
+          playBlockedHaptic();
+        }
         return;
       }
-      const spawned = spawnTile(result.tiles, gridSize);
-      const tiles = spawned ? [...result.tiles, spawned] : result.tiles;
+
+      const spawned = spawnTile(result.tiles, gridSize, state.nextTileId);
+      const tiles = spawned.tile
+        ? [...result.tiles, spawned.tile]
+        : result.tiles;
       const score = state.score + result.scoreGained;
       const moves = state.moves + 1;
       const won = !state.keepPlaying && hasWon(tiles, winTarget);
@@ -91,58 +97,67 @@ export function useGameController() {
 
       useGameStore.getState().set({
         tiles,
+        nextTileId: spawned.nextTileId,
         score,
         moves,
         status,
+        lastGain: result.scoreGained,
+        gainSeq: state.gainSeq + 1,
         previous: {
           tiles: clearTransientFlags(state.tiles),
           score: state.score,
           moves: state.moves,
           keepPlaying: state.keepPlaying,
-          nextTileId: snapshotNextId,
+          nextTileId: state.nextTileId,
         },
       });
-      playMoveHaptic(result.scoreGained > 0);
-      if (result.scoreGained > 0 && useSettingsStore.getState().soundEnabled) {
+
+      if (settings.hapticsEnabled) {
+        playMoveHaptic(result.scoreGained > 0);
+      }
+      if (result.scoreGained > 0 && settings.soundEnabled) {
         playScoreSound();
       }
 
       if (status === 'over') {
         void finalizeGame(tiles, score, moves, state.startedAt);
       } else {
-        void useStatsStore.getState().updateBest(score);
+        useStatsStore.getState().updateBest(score);
         void persistGame();
       }
 
       clearPendingCleanup();
-      const speed = useSettingsStore.getState().animationSpeed;
       timer.current = setTimeout(() => {
         const current = useGameStore.getState();
         current.set({ tiles: clearTransientFlags(current.tiles) });
-      }, transientClearMs(speed));
+      }, transientClearMs(settings.animationSpeed));
     },
     [clearPendingCleanup, finalizeGame],
   );
 
   const undo = useCallback(async () => {
-    const state = useGameStore.getState();
-    if (!state.previous || state.status !== 'playing') {
+    if (!useGameStore.getState().previous) {
       return;
     }
     const granted = await getAdService().showRewardedAd();
     if (!granted) {
       return;
     }
-    clearPendingCleanup();
+    const state = useGameStore.getState();
     const snapshot = state.previous;
-    setNextId(snapshot.nextTileId);
-    useGameStore.getState().set({
+    if (!snapshot || state.status === 'over') {
+      return;
+    }
+    clearPendingCleanup();
+    state.set({
       tiles: snapshot.tiles,
+      nextTileId: snapshot.nextTileId,
       score: snapshot.score,
       moves: snapshot.moves,
       status: 'playing',
       keepPlaying: snapshot.keepPlaying,
       previous: null,
+      lastGain: 0,
     });
     void persistGame();
   }, [clearPendingCleanup]);

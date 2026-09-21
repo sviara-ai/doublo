@@ -16,6 +16,7 @@ export const GameSettingsSchema = z.object({
   winTarget: z.number(),
   animationSpeed: z.enum(['normal', 'fast']),
   soundEnabled: z.boolean(),
+  hapticsEnabled: z.boolean(),
 });
 
 export const SavedGameSchema = z.object({

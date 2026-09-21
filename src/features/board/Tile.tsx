@@ -7,6 +7,8 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { tileColor } from '@/theme/tiles';
+import { motion } from '@/theme/tokens';
+import { describeTile } from './board-a11y';
 import type { Tile as TileModel } from '@/shared/types';
 
 interface Props {
@@ -14,15 +16,25 @@ interface Props {
   x: number;
   y: number;
   size: number;
+  cornerRadius: number;
   fontSize: number;
   duration: number;
 }
 
-function TileView({ tile, x, y, size, fontSize, duration }: Props) {
+function TileView({
+  tile,
+  x,
+  y,
+  size,
+  cornerRadius,
+  fontSize,
+  duration,
+}: Props) {
   const tx = useSharedValue(x);
   const ty = useSharedValue(y);
   const scale = useSharedValue(tile.isNew ? 0 : 1);
   const opacity = useSharedValue(1);
+  const popMs = duration === 0 ? 0 : motion.popMs;
 
   useEffect(() => {
     tx.value = withTiming(x, { duration });
@@ -38,11 +50,11 @@ function TileView({ tile, x, y, size, fontSize, duration }: Props) {
   useEffect(() => {
     if (tile.justMerged) {
       scale.value = withSequence(
-        withTiming(1.12, { duration: 70 }),
-        withTiming(1, { duration: 70 }),
+        withTiming(motion.popScale, { duration: popMs }),
+        withTiming(1, { duration: popMs }),
       );
     }
-  }, [tile.justMerged, scale]);
+  }, [tile.justMerged, popMs, scale]);
 
   useEffect(() => {
     if (tile.merging) {
@@ -64,12 +76,16 @@ function TileView({ tile, x, y, size, fontSize, duration }: Props) {
 
   return (
     <Animated.View
+      accessibilityRole="text"
+      accessibilityLabel={describeTile(tile)}
+      accessibilityElementsHidden={tile.merging}
+      importantForAccessibility={tile.merging ? 'no-hide-descendants' : 'yes'}
       style={[
         styles.tile,
         {
           width: size,
           height: size,
-          borderRadius: size * 0.12,
+          borderRadius: cornerRadius,
           backgroundColor: colors.background,
           zIndex,
         },
@@ -95,6 +111,7 @@ export const Tile = memo(
     prev.x === next.x &&
     prev.y === next.y &&
     prev.size === next.size &&
+    prev.cornerRadius === next.cornerRadius &&
     prev.fontSize === next.fontSize &&
     prev.duration === next.duration &&
     prev.tile.isNew === next.tile.isNew &&

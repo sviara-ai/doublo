@@ -1,29 +1,16 @@
 import {
+  FIRST_TILE_ID,
   SPAWN_BONUS_TILE_VALUE,
   SPAWN_FOUR_PROBABILITY,
   SPAWN_TILE_VALUE,
 } from './constants';
-import type { Direction, MoveResult, Tile } from '@/shared/types';
-
-let nextId = 1;
-
-function createId(): number {
-  const id = nextId;
-  nextId += 1;
-  return id;
-}
-
-export function getNextId(): number {
-  return nextId;
-}
-
-export function setNextId(value: number): void {
-  nextId = value;
-}
-
-export function resetIds(): void {
-  nextId = 1;
-}
+import type {
+  Direction,
+  InitialTilesResult,
+  MoveResult,
+  SpawnResult,
+  Tile,
+} from '@/shared/types';
 
 function logicalTiles(tiles: Tile[]): Tile[] {
   return tiles.filter((tile) => !tile.merging);
@@ -50,34 +37,45 @@ function emptyCells(
 export function spawnTile(
   tiles: Tile[],
   size: number,
+  nextTileId: number,
   random: () => number = Math.random,
-): Tile | null {
+): SpawnResult {
   const cells = emptyCells(tiles, size);
   if (cells.length === 0) {
-    return null;
+    return { tile: null, nextTileId };
   }
   const cell = cells[Math.floor(random() * cells.length)];
   const value =
     random() < SPAWN_FOUR_PROBABILITY
       ? SPAWN_BONUS_TILE_VALUE
       : SPAWN_TILE_VALUE;
-  return { id: createId(), value, row: cell.row, col: cell.col, isNew: true };
+  return {
+    tile: {
+      id: nextTileId,
+      value,
+      row: cell.row,
+      col: cell.col,
+      isNew: true,
+    },
+    nextTileId: nextTileId + 1,
+  };
 }
 
 export function createInitialTiles(
   size: number,
   startTiles: number,
   random: () => number = Math.random,
-): Tile[] {
-  resetIds();
+): InitialTilesResult {
   let tiles: Tile[] = [];
+  let nextTileId = FIRST_TILE_ID;
   for (let i = 0; i < startTiles; i += 1) {
-    const tile = spawnTile(tiles, size, random);
-    if (tile) {
-      tiles = [...tiles, tile];
+    const spawned = spawnTile(tiles, size, nextTileId, random);
+    if (spawned.tile) {
+      tiles = [...tiles, spawned.tile];
     }
+    nextTileId = spawned.nextTileId;
   }
-  return tiles;
+  return { tiles, nextTileId };
 }
 
 function lineCells(

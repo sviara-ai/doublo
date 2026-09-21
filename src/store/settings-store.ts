@@ -20,12 +20,21 @@ export const useSettingsStore = create<SettingsState>()((set, get) => ({
     set({ ...(saved ?? DEFAULT_SETTINGS), loaded: true });
   },
   update: async (partial) => {
+    const {
+      gridSize,
+      startTiles,
+      winTarget,
+      animationSpeed,
+      soundEnabled,
+      hapticsEnabled,
+    } = get();
     const next: GameSettings = {
-      gridSize: get().gridSize,
-      startTiles: get().startTiles,
-      winTarget: get().winTarget,
-      animationSpeed: get().animationSpeed,
-      soundEnabled: get().soundEnabled,
+      gridSize,
+      startTiles,
+      winTarget,
+      animationSpeed,
+      soundEnabled,
+      hapticsEnabled,
       ...partial,
     };
     await saveSettings(next);
