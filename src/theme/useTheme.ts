@@ -1,9 +1,9 @@
 import { useMemo } from 'react';
-import { useColorScheme } from 'react-native';
+import { useScheme } from './color-scheme';
 import { darkColors, lightColors, type Colors } from './colors';
 
 export function useColors(): Colors {
-  const scheme = useColorScheme();
+  const scheme = useScheme();
   return scheme === 'dark' ? darkColors : lightColors;
 }
 

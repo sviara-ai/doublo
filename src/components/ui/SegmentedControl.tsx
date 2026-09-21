@@ -125,11 +125,11 @@ const makeStyles = (colors: Colors) =>
       backgroundColor: colors.hover,
     },
     segmentPressed: {
-      backgroundColor: colors.segmentActive,
+      backgroundColor: colors.raised,
       opacity: 0.7,
     },
     segmentSelected: {
-      backgroundColor: colors.segmentActive,
+      backgroundColor: colors.raised,
       shadowColor: colors.shadow,
       ...elevation.card,
     },

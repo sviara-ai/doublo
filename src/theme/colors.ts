@@ -19,7 +19,7 @@ export interface Colors {
   hairline: string;
   shadow: string;
   track: string;
-  segmentActive: string;
+  raised: string;
   hover: string;
   focusRing: string;
 }
@@ -45,7 +45,7 @@ export const lightColors: Colors = {
   hairline: '#D4E0F4',
   shadow: 'rgba(10, 27, 61, 0.10)',
   track: '#E4EDFB',
-  segmentActive: '#FFFFFF',
+  raised: '#FFFFFF',
   hover: '#EDF3FD',
   focusRing: '#0060C7',
 };
@@ -71,7 +71,7 @@ export const darkColors: Colors = {
   hairline: '#2A3756',
   shadow: 'rgba(0, 0, 0, 0.45)',
   track: '#141F38',
-  segmentActive: '#2C3F66',
+  raised: '#2C3F66',
   hover: '#1B2947',
   focusRing: '#6FA6F5',
 };

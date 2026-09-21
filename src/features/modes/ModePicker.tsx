@@ -99,7 +99,7 @@ const makeStyles = (colors: Colors) =>
       justifyContent: 'center',
     },
     cardHovered: {
-      backgroundColor: colors.hover,
+      backgroundColor: colors.raised,
       borderColor: colors.primary,
     },
     cardPressed: {
