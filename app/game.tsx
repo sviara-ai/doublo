@@ -11,6 +11,7 @@ import { Header } from '@/features/hud/Header';
 import { ScorePanel } from '@/features/hud/ScorePanel';
 import { Overlay } from '@/components/ui/Overlay';
 import { useGameController } from '@/hooks/useGameController';
+import { useInterstitialAd } from '@/hooks/useInterstitialAd';
 import { goHomeOrBack } from '@/lib/navigation';
 import { useGameStore } from '@/store/game-store';
 import type { Colors } from '@/theme/colors';
@@ -25,6 +26,7 @@ function contentJustify(isShort: boolean): ViewStyle['justifyContent'] {
 export default function GameScreen() {
   const router = useRouter();
   const { move, newGame, undo, continueAfterWin } = useGameController();
+  const { showAdThenCallback } = useInterstitialAd();
   const tiles = useGameStore((state) => state.tiles);
   const status = useGameStore((state) => state.status);
   const canUndo = useGameStore(
@@ -46,10 +48,11 @@ export default function GameScreen() {
   }, [status]);
   const closeOverlay = () => setOverlayDismissed(true);
   const showOverlay = !isPlaying && !overlayDismissed;
+  const handleNewGame = () => showAdThenCallback(newGame);
 
   const hud = (
     <>
-      <Header onBack={() => goHomeOrBack(router)} onRestart={newGame} />
+      <Header onBack={() => goHomeOrBack(router)} onRestart={handleNewGame} />
       <ScorePanel />
       <ControlBar
         canUndo={canUndo}
@@ -74,7 +77,7 @@ export default function GameScreen() {
           title="Game Over"
           message="No moves left on this board."
           actionLabel="New Game"
-          onAction={newGame}
+          onAction={handleNewGame}
           onClose={closeOverlay}
           closeLabel="Dismiss and review the final board"
         />
@@ -86,7 +89,7 @@ export default function GameScreen() {
           actionLabel="Keep Going"
           onAction={continueAfterWin}
           secondaryLabel="New Game"
-          onSecondary={newGame}
+          onSecondary={handleNewGame}
           onClose={continueAfterWin}
           closeLabel="Dismiss and keep playing"
         />
@@ -136,10 +139,7 @@ export default function GameScreen() {
 
 const makeStyles = (colors: Colors) =>
   StyleSheet.create({
-    safe: {
-      flex: 1,
-      backgroundColor: colors.background,
-    },
+    safe: { flex: 1, backgroundColor: colors.background },
     container: {
       flex: 1,
       width: '100%',
@@ -167,8 +167,5 @@ const makeStyles = (colors: Colors) =>
       justifyContent: 'center',
       gap: spacing.md,
     },
-    hint: {
-      fontSize: font.sm,
-      color: colors.textMuted,
-    },
+    hint: { fontSize: font.sm, color: colors.textMuted },
   });
