@@ -1,4 +1,4 @@
-import { memo, useEffect } from 'react';
+import { memo, useEffect, useRef } from 'react';
 import { StyleSheet, Text } from 'react-native';
 import Animated, {
   useAnimatedStyle,
@@ -33,13 +33,28 @@ function TileView({
   const tx = useSharedValue(x);
   const ty = useSharedValue(y);
   const scale = useSharedValue(tile.isNew ? 0 : 1);
+  const squash = useSharedValue(1);
   const opacity = useSharedValue(1);
   const popMs = duration === 0 ? 0 : motion.popMs;
+  const lastPosition = useRef({ x, y });
 
   useEffect(() => {
+    const travelled = Math.max(
+      Math.abs(x - lastPosition.current.x),
+      Math.abs(y - lastPosition.current.y),
+    );
+    lastPosition.current = { x, y };
     tx.value = withTiming(x, { duration });
     ty.value = withTiming(y, { duration });
-  }, [x, y, duration, tx, ty]);
+    if (travelled <= 0 || duration === 0 || tile.isNew) {
+      return;
+    }
+    const weight = Math.min(travelled / (size * motion.landingSpan), 1);
+    squash.value = withSequence(
+      withTiming(1 - weight * motion.landingSquash, { duration }),
+      withTiming(1, { duration: motion.popMs }),
+    );
+  }, [x, y, size, duration, tile.isNew, tx, ty, squash]);
 
   useEffect(() => {
     if (tile.isNew) {
@@ -66,7 +81,7 @@ function TileView({
     transform: [
       { translateX: tx.value },
       { translateY: ty.value },
-      { scale: scale.value },
+      { scale: scale.value * squash.value },
     ],
     opacity: opacity.value,
   }));

@@ -5,7 +5,11 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { Branding } from '@/components/ui/Branding';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
+import { installFocusRing } from '@/lib/focus-ring';
+import { darkColors, lightColors } from '@/theme/colors';
 import { useColors } from '@/theme/useTheme';
+
+installFocusRing(lightColors.focusRing, darkColors.focusRing);
 
 export default function RootLayout() {
   const colors = useColors();

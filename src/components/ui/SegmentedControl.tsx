@@ -1,5 +1,5 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { clearWebFocus } from '@/lib/focus';
+import { useInteractive } from '@/hooks/useInteractive';
 import type { Colors } from '@/theme/colors';
 import { useThemedStyles } from '@/theme/useTheme';
 import { elevation, font, layout, radius, spacing } from '@/theme/tokens';
@@ -17,6 +17,42 @@ interface Props {
   onChange: (value: string | number) => void;
 }
 
+interface SegmentProps {
+  groupLabel: string;
+  option: SegmentOption;
+  selected: boolean;
+  onPress: () => void;
+}
+
+function Segment({ groupLabel, option, selected, onPress }: SegmentProps) {
+  const styles = useThemedStyles(makeStyles);
+  const { hovered, interactiveProps } = useInteractive();
+  return (
+    <Pressable
+      accessibilityRole="radio"
+      accessibilityLabel={`${groupLabel}, ${option.label}`}
+      accessibilityState={{ selected, checked: selected }}
+      aria-checked={selected}
+      onPress={onPress}
+      {...interactiveProps}
+      style={({ pressed }) => [
+        styles.segment,
+        selected && styles.segmentSelected,
+        hovered && !selected && styles.segmentHovered,
+        pressed && !selected && styles.segmentPressed,
+      ]}
+    >
+      <Text
+        style={[styles.text, selected && styles.textSelected]}
+        numberOfLines={1}
+        adjustsFontSizeToFit
+      >
+        {option.label}
+      </Text>
+    </Pressable>
+  );
+}
+
 export function SegmentedControl({
   label,
   hint,
@@ -32,35 +68,15 @@ export function SegmentedControl({
         {hint ? <Text style={styles.hint}>{hint}</Text> : null}
       </View>
       <View style={styles.track} accessibilityRole="radiogroup">
-        {options.map((option) => {
-          const selected = option.value === value;
-          return (
-            <Pressable
-              key={String(option.value)}
-              accessibilityRole="radio"
-              accessibilityLabel={`${label}, ${option.label}`}
-              accessibilityState={{ selected, checked: selected }}
-              aria-checked={selected}
-              onPress={() => {
-                clearWebFocus();
-                onChange(option.value);
-              }}
-              style={({ pressed }) => [
-                styles.segment,
-                selected && styles.segmentSelected,
-                pressed && !selected && styles.segmentPressed,
-              ]}
-            >
-              <Text
-                style={[styles.text, selected && styles.textSelected]}
-                numberOfLines={1}
-                adjustsFontSizeToFit
-              >
-                {option.label}
-              </Text>
-            </Pressable>
-          );
-        })}
+        {options.map((option) => (
+          <Segment
+            key={String(option.value)}
+            groupLabel={label}
+            option={option}
+            selected={option.value === value}
+            onPress={() => onChange(option.value)}
+          />
+        ))}
       </View>
     </View>
   );
@@ -105,8 +121,12 @@ const makeStyles = (colors: Colors) =>
       alignItems: 'center',
       justifyContent: 'center',
     },
-    segmentPressed: {
+    segmentHovered: {
       backgroundColor: colors.hover,
+    },
+    segmentPressed: {
+      backgroundColor: colors.segmentActive,
+      opacity: 0.7,
     },
     segmentSelected: {
       backgroundColor: colors.segmentActive,

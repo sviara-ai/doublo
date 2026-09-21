@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { clearWebFocus } from '@/lib/focus';
+import { useInteractive } from '@/hooks/useInteractive';
 import type { Colors } from '@/theme/colors';
 import { useThemedStyles } from '@/theme/useTheme';
 import { font, layout, radius, spacing } from '@/theme/tokens';
@@ -13,6 +13,7 @@ interface Props {
 
 export function ScreenHeader({ title, onBack, trailing }: Props) {
   const styles = useThemedStyles(makeStyles);
+  const { hovered, interactiveProps } = useInteractive();
   return (
     <View style={styles.header}>
       <View style={styles.side}>
@@ -20,11 +21,13 @@ export function ScreenHeader({ title, onBack, trailing }: Props) {
           accessibilityRole="button"
           accessibilityLabel="Go back"
           hitSlop={12}
-          onPress={() => {
-            clearWebFocus();
-            onBack();
-          }}
-          style={({ pressed }) => [styles.back, pressed && styles.backPressed]}
+          onPress={onBack}
+          {...interactiveProps}
+          style={({ pressed }) => [
+            styles.back,
+            hovered && styles.backHovered,
+            pressed && styles.backPressed,
+          ]}
         >
           <Text style={styles.backLabel}>‹</Text>
         </Pressable>
@@ -70,8 +73,12 @@ const makeStyles = (colors: Colors) =>
       alignItems: 'center',
       justifyContent: 'center',
     },
-    backPressed: {
+    backHovered: {
       backgroundColor: colors.hover,
+      borderColor: colors.primary,
+    },
+    backPressed: {
+      backgroundColor: colors.track,
     },
     backLabel: {
       color: colors.primary,

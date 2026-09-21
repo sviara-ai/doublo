@@ -1,5 +1,5 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { clearWebFocus } from '@/lib/focus';
+import { useInteractive } from '@/hooks/useInteractive';
 import type { Direction } from '@/shared/types';
 import type { Colors } from '@/theme/colors';
 import { useThemedStyles } from '@/theme/useTheme';
@@ -19,20 +19,19 @@ interface MoveButtonProps {
 
 function MoveButton({ label, direction, onMove, enabled }: MoveButtonProps) {
   const styles = useThemedStyles(makeStyles);
-  const handlePress = () => {
-    clearWebFocus();
-    onMove(direction);
-  };
+  const { hovered, interactiveProps } = useInteractive();
 
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={`Move ${direction}`}
       disabled={!enabled}
-      onPress={handlePress}
+      onPress={() => onMove(direction)}
+      {...interactiveProps}
       style={({ pressed }) => [
         styles.button,
         !enabled && styles.buttonDisabled,
+        hovered && enabled && styles.buttonHovered,
         pressed && enabled && styles.buttonPressed,
       ]}
     >
@@ -100,6 +99,10 @@ const makeStyles = (colors: Colors) =>
       borderColor: colors.hairline,
       alignItems: 'center',
       justifyContent: 'center',
+    },
+    buttonHovered: {
+      backgroundColor: colors.hover,
+      borderColor: colors.primary,
     },
     buttonPressed: {
       backgroundColor: colors.boardCell,

@@ -1,5 +1,5 @@
 import { Pressable, StyleSheet, Text } from 'react-native';
-import { clearWebFocus } from '@/lib/focus';
+import { useInteractive } from '@/hooks/useInteractive';
 import type { Colors } from '@/theme/colors';
 import { useThemedStyles } from '@/theme/useTheme';
 import { elevation, font, layout, radius, spacing } from '@/theme/tokens';
@@ -22,20 +22,19 @@ export function Button({
   inline = false,
 }: Props) {
   const styles = useThemedStyles(makeStyles);
-  const handlePress = () => {
-    clearWebFocus();
-    onPress();
-  };
+  const { hovered, interactiveProps } = useInteractive();
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityState={{ disabled }}
       disabled={disabled}
-      onPress={handlePress}
+      onPress={onPress}
+      {...interactiveProps}
       style={({ pressed }) => [
         styles.base,
         inline ? styles.inline : styles.block,
         styles[variant],
+        hovered && !disabled && styles[`${variant}Hovered`],
         pressed && !disabled && styles[`${variant}Pressed`],
         disabled && styles.disabled,
       ]}
@@ -72,12 +71,19 @@ const makeStyles = (colors: Colors) =>
       shadowColor: colors.shadow,
       ...elevation.card,
     },
+    solidHovered: {
+      backgroundColor: colors.primaryPressed,
+      borderColor: colors.primaryPressed,
+    },
     solidPressed: {
       backgroundColor: colors.primaryPressed,
       borderColor: colors.primaryPressed,
     },
     ghost: {
       backgroundColor: 'transparent',
+    },
+    ghostHovered: {
+      backgroundColor: colors.hover,
     },
     ghostPressed: {
       opacity: 0.6,
@@ -86,8 +92,11 @@ const makeStyles = (colors: Colors) =>
       backgroundColor: colors.surface,
       borderColor: colors.hairline,
     },
-    outlinePressed: {
+    outlineHovered: {
       backgroundColor: colors.hover,
+    },
+    outlinePressed: {
+      backgroundColor: colors.track,
     },
     disabled: {
       opacity: 0.45,

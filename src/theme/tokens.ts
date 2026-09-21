@@ -70,4 +70,6 @@ export const motion = {
   shakeOffset: 9,
   pulseMs: 190,
   pulseScale: 1.18,
+  landingSquash: 0.08,
+  landingSpan: 3,
 };

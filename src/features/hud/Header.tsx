@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { MODE_LABELS } from '@/game/constants';
-import { clearWebFocus } from '@/lib/focus';
+import { useInteractive } from '@/hooks/useInteractive';
 import type { Colors } from '@/theme/colors';
 import { useThemedStyles } from '@/theme/useTheme';
 import { font, layout, radius, spacing } from '@/theme/tokens';
@@ -14,6 +14,8 @@ interface Props {
 export function Header({ onBack, onRestart }: Props) {
   const styles = useThemedStyles(makeStyles);
   const mode = useGameStore((state) => state.mode);
+  const back = useInteractive();
+  const restart = useInteractive();
 
   return (
     <View style={styles.header}>
@@ -21,11 +23,13 @@ export function Header({ onBack, onRestart }: Props) {
         accessibilityRole="button"
         accessibilityLabel="Back to home"
         hitSlop={12}
-        onPress={() => {
-          clearWebFocus();
-          onBack();
-        }}
-        style={({ pressed }) => [styles.icon, pressed && styles.iconPressed]}
+        onPress={onBack}
+        {...back.interactiveProps}
+        style={({ pressed }) => [
+          styles.icon,
+          back.hovered && styles.iconHovered,
+          pressed && styles.iconPressed,
+        ]}
       >
         <Text style={styles.iconLabel}>‹</Text>
       </Pressable>
@@ -43,11 +47,13 @@ export function Header({ onBack, onRestart }: Props) {
         accessibilityRole="button"
         accessibilityLabel="Start a new game"
         hitSlop={8}
-        onPress={() => {
-          clearWebFocus();
-          onRestart();
-        }}
-        style={({ pressed }) => [styles.new, pressed && styles.newPressed]}
+        onPress={onRestart}
+        {...restart.interactiveProps}
+        style={({ pressed }) => [
+          styles.new,
+          restart.hovered && styles.newHovered,
+          pressed && styles.newPressed,
+        ]}
       >
         <Text style={styles.newLabel}>New</Text>
       </Pressable>
@@ -74,8 +80,12 @@ const makeStyles = (colors: Colors) =>
       alignItems: 'center',
       justifyContent: 'center',
     },
-    iconPressed: {
+    iconHovered: {
       backgroundColor: colors.hover,
+      borderColor: colors.primary,
+    },
+    iconPressed: {
+      backgroundColor: colors.track,
     },
     iconLabel: {
       color: colors.primary,
@@ -108,8 +118,12 @@ const makeStyles = (colors: Colors) =>
       alignItems: 'center',
       justifyContent: 'center',
     },
-    newPressed: {
+    newHovered: {
       backgroundColor: colors.hover,
+      borderColor: colors.primary,
+    },
+    newPressed: {
+      backgroundColor: colors.track,
     },
     newLabel: {
       color: colors.text,

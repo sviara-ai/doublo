@@ -1,5 +1,5 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { clearWebFocus } from '@/lib/focus';
+import { useInteractive } from '@/hooks/useInteractive';
 import type { Colors } from '@/theme/colors';
 import { useThemedStyles } from '@/theme/useTheme';
 import { font, radius, spacing } from '@/theme/tokens';
@@ -19,18 +19,17 @@ interface ChipProps {
 
 function Chip({ label, onPress, disabled = false }: ChipProps) {
   const styles = useThemedStyles(makeStyles);
-  const handlePress = () => {
-    clearWebFocus();
-    onPress();
-  };
+  const { hovered, interactiveProps } = useInteractive();
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityState={{ disabled }}
       disabled={disabled}
-      onPress={handlePress}
+      onPress={onPress}
+      {...interactiveProps}
       style={({ pressed }) => [
         styles.chip,
+        hovered && !disabled && styles.chipHovered,
         pressed && !disabled && styles.chipPressed,
         disabled && styles.chipDisabled,
       ]}
@@ -77,6 +76,9 @@ const makeStyles = (colors: Colors) =>
       backgroundColor: colors.surface,
       alignItems: 'center',
       justifyContent: 'center',
+    },
+    chipHovered: {
+      backgroundColor: colors.hover,
     },
     chipPressed: {
       backgroundColor: colors.boardCell,

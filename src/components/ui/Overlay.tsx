@@ -1,5 +1,4 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { clearWebFocus } from '@/lib/focus';
 import type { Colors } from '@/theme/colors';
 import { useThemedStyles } from '@/theme/useTheme';
 import { font, layout, radius, spacing } from '@/theme/tokens';
@@ -39,10 +38,7 @@ export function Overlay({
           accessibilityRole="button"
           accessibilityLabel={closeLabel}
           hitSlop={12}
-          onPress={() => {
-            clearWebFocus();
-            onClose();
-          }}
+          onPress={onClose}
           style={({ pressed }) => [styles.close, pressed && styles.closePressed]}
         >
           <Text style={styles.closeLabel}>×</Text>
